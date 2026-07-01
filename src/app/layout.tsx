@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: "SakuChat | Asisten Keuangan Pribadi Berbasis Chat",
   description: "Aplikasi PWA pencatatan pengeluaran pribadi semudah obrolan (chat) dengan analisis persentase kategori, detektor lonjakan, dan offline-first.",
   manifest: "/manifest.json",
+  icons: {
+    apple: "/icon-192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

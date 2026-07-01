@@ -32,6 +32,10 @@ export default function Navbar({ onOpenSettings }: NavbarProps) {
       autoSyncIfOnline().then(() => setSession(getStoredSession()));
     }
 
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
     const interval = setInterval(() => {
       setSession(getStoredSession());
     }, 2000);
