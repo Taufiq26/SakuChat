@@ -223,12 +223,12 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
       'Ya, Hapus Semua',
       async () => {
         clearAllLocalData();
-        await deleteAllCloudTransactions();
         setLocalCount(0);
         setSession((prev) => ({ ...prev, syncedCount: 0 }));
         setSyncStatusMsg('Semua data lokal dan cloud berhasil dihapus bersih.');
-        onDataReset();
         closeModal();
+        await deleteAllCloudTransactions();
+        onDataReset();
       }
     );
   };

@@ -160,8 +160,6 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
 
   const handleDeleteTx = async (txId: string) => {
     deleteTransaction(txId);
-    await deleteCloudTransaction(txId);
-    onTransactionUpdated();
     setMessages((prev) =>
       prev.map((m) =>
         m.transactionId === txId
@@ -169,13 +167,15 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
           : m
       )
     );
+    await deleteCloudTransaction(txId);
+    onTransactionUpdated();
   };
 
-  const handleCategoryChange = (txId: string, newCat: CategoryName) => {
+  const handleCategoryChange = async (txId: string, newCat: CategoryName) => {
     updateTransactionCategory(txId, newCat);
-    updateCloudTransactionCategory(txId, newCat);
-    onTransactionUpdated();
     setMessages((prev) => [...prev]);
+    await updateCloudTransactionCategory(txId, newCat);
+    onTransactionUpdated();
   };
 
   const handleDateUpdate = (txId: string, newDateISO: string) => {
