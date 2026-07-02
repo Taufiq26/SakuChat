@@ -8,6 +8,7 @@ import ReportsView from '@/components/ReportsView';
 import SettingsView from '@/components/SettingsView';
 import { getStoredTransactions, getAnomalyAlerts } from '@/lib/storage';
 import { supabase, getStoredSession, saveSession, autoMergeLocalTransactions, autoSyncIfOnline } from '@/lib/supabase';
+import InstallPromptModal from '@/components/InstallPromptModal';
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<TabType>('chat');
@@ -115,6 +116,7 @@ export default function HomePage() {
       </main>
 
       <BottomNav activeTab={activeTab} onSelectTab={setActiveTab} unreadAlertsCount={alertsCount} />
+      <InstallPromptModal />
     </div>
   );
 }
