@@ -9,13 +9,36 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sakuchat.smartpixel.id"),
   title: "SakuChat | Asisten Keuangan Pribadi Berbasis Chat",
   description: "Aplikasi PWA pencatatan pengeluaran pribadi semudah obrolan (chat) dengan analisis persentase kategori, detektor lonjakan, dan offline-first.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
+    icon: "/icon-192.png",
+    shortcut: "/icon-192.png",
     apple: "/icon-192.png",
+  },
+  openGraph: {
+    title: "SakuChat | Asisten Keuangan Pribadi Berbasis Chat",
+    description: "Catat pengeluaran semudah obrolan chat! Dilengkapi On-Device WebAI, 100% Privat, Offline-First, dan Gratis Selamanya.",
+    url: "https://sakuchat.smartpixel.id",
+    siteName: "SakuChat",
+    images: [
+      {
+        url: "/icon-512.png",
+        width: 512,
+        height: 512,
+        alt: "SakuChat Logo",
+      },
+    ],
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "SakuChat | Asisten Keuangan Pribadi Berbasis Chat",
+    description: "Catat pengeluaran semudah obrolan chat! Dilengkapi On-Device WebAI, 100% Privat, Offline-First, dan Gratis Selamanya.",
+    images: ["/icon-512.png"],
   },
   appleWebApp: {
     capable: true,
