@@ -636,21 +636,21 @@ export default function ReportsView() {
                         categoryBadge: selectedCategory === 'SEMUA' ? undefined : { name: selectedCategory, color: CATEGORY_COLORS[selectedCategory] || '#818CF8' }
                       });
                     }}
-                    className={`p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-xs transition-all ${m.count > 0 ? 'cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:scale-[1.01] active:scale-[0.99]' : 'opacity-70 cursor-default'}`}
+                    className={`p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-2 sm:gap-3 shadow-xs transition-all ${m.count > 0 ? 'cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:scale-[1.01] active:scale-[0.99]' : 'opacity-70 cursor-default'}`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                       <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 font-black text-xs text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0">
                         {m.shortName}
                       </div>
-                      <div className="min-w-0">
-                        <div className="font-extrabold text-xs text-slate-800 dark:text-slate-100 truncate">{m.name}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-extrabold text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-tight">{m.name}</div>
                         <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{m.count} transaksi</div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-3 shrink-0 text-right">
                       {changeEl}
-                      <span className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-100 w-24 text-right">
+                      <span className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-100">
                         Rp {m.amount.toLocaleString('id-ID')}
                       </span>
                     </div>
