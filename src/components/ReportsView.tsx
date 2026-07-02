@@ -11,6 +11,7 @@ interface DetailModalInfo {
   title: string;
   subtitle: string;
   transactions: Transaction[];
+  hideCategory?: boolean;
 }
 
 export default function ReportsView() {
@@ -385,7 +386,8 @@ export default function ReportsView() {
                           isOpen: true,
                           title: `Top Spending: ${cat.category}`,
                           subtitle: `Periode: ${filterLabel} • Total: Rp ${cat.amount.toLocaleString('id-ID')}`,
-                          transactions: catTxs
+                          transactions: catTxs,
+                          hideCategory: true
                         });
                       }}
                       className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between transition-all hover:border-indigo-300 dark:hover:border-indigo-500/50 shadow-xs cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
@@ -625,7 +627,8 @@ export default function ReportsView() {
                         isOpen: true,
                         title: `Rincian Pengeluaran: ${m.name} ${selectedYear}`,
                         subtitle: `Kategori: ${selectedCategory === 'SEMUA' ? 'Semua Kategori' : selectedCategory} • Total: Rp ${m.amount.toLocaleString('id-ID')}`,
-                        transactions: monthTxs
+                        transactions: monthTxs,
+                        hideCategory: selectedCategory !== 'SEMUA'
                       });
                     }}
                     className={`p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-xs transition-all ${m.count > 0 ? 'cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:scale-[1.01] active:scale-[0.99]' : 'opacity-70 cursor-default'}`}
@@ -660,9 +663,9 @@ export default function ReportsView() {
           <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[82vh] overflow-hidden">
             {/* Modal Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
-              <div className="min-w-0">
-                <h3 className="font-black text-base text-slate-800 dark:text-slate-100 truncate">{detailModal.title}</h3>
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{detailModal.subtitle}</p>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-black text-base text-slate-800 dark:text-slate-100 leading-snug break-words">{detailModal.title}</h3>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 leading-normal">{detailModal.subtitle}</p>
               </div>
               <button
                 onClick={() => setDetailModal(null)}
@@ -692,18 +695,22 @@ export default function ReportsView() {
                       className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between gap-3"
                     >
                       <div className="min-w-0 flex-1">
-                        <div className="font-bold text-sm text-slate-800 dark:text-slate-100 break-words">{tx.rawText}</div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span
-                            className="text-[10px] font-black px-2 py-0.5 rounded-md text-white shrink-0"
-                            style={{ backgroundColor: catColor }}
-                          >
-                            {tx.category}
+                        <div className="font-bold text-sm text-slate-800 dark:text-slate-100 break-words leading-snug">{tx.rawText}</div>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          {!detailModal.hideCategory && (
+                            <span
+                              className="text-[10px] font-black px-2 py-0.5 rounded-md text-white shrink-0"
+                              style={{ backgroundColor: catColor }}
+                            >
+                              {tx.category}
+                            </span>
+                          )}
+                          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                            <Calendar className="w-3 h-3 inline" /> {dateFormatted}
                           </span>
-                          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">{dateFormatted}</span>
                         </div>
                       </div>
-                      <div className="font-black text-sm text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <div className="font-black text-sm text-emerald-600 dark:text-emerald-400 shrink-0 text-right">
                         Rp {tx.amount.toLocaleString('id-ID')}
                       </div>
                     </div>
