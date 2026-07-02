@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     /* Bright, Friendly, Soft Pastel UI Theme Variables */
@@ -26,6 +28,15 @@
     /* Shadows */
     --shadow-floating: 0 12px 35px -8px rgba(148, 163, 184, 0.25);
     --shadow-soft: 0 4px 20px -4px rgba(148, 163, 184, 0.12);
+  }
+
+  :root.dark, .dark {
+    --bg-primary: #0A0F1D;
+    --bg-secondary: #111827;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border-glass: rgba(51, 65, 85, 0.8);
+    --bg-glass: rgba(17, 24, 39, 0.88);
   }
 }
 
@@ -158,4 +169,131 @@ body {
 
 .animate-pop-in {
   animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ========================================================
+   DARK MODE PREMIUM OBSIDIAN THEME OVERRIDES
+   ======================================================== */
+.dark body {
+  background: linear-gradient(135deg, #030712 0%, #0B0F19 50%, #0F172A 100%);
+  color: #F8FAFC;
+}
+
+.dark .app-container {
+  background-color: #0A0F1D;
+  border-color: rgba(51, 65, 85, 0.8);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(17, 24, 39, 0.88);
+  border-color: rgba(51, 65, 85, 0.75);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.dark header {
+  background: rgba(10, 15, 29, 0.92) !important;
+  border-color: rgba(51, 65, 85, 0.7) !important;
+}
+
+.dark footer {
+  background: rgba(10, 15, 29, 0.95) !important;
+  border-color: rgba(51, 65, 85, 0.7) !important;
+}
+
+.dark .floating-input-bar {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(71, 85, 105, 0.8);
+  box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.6);
+}
+
+.dark .bubble-assistant {
+  background: rgba(30, 41, 59, 0.85);
+  color: #F8FAFC;
+  border-color: rgba(51, 65, 85, 0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Bulletproof Automated Dark Overrides for standard Slate & White utility classes */
+.dark [class*="bg-white"] {
+  background-color: rgba(17, 24, 39, 0.92) !important;
+}
+
+.dark [class*="bg-slate-50"] {
+  background-color: rgba(30, 41, 59, 0.88) !important;
+}
+
+.dark [class*="bg-slate-100"] {
+  background-color: rgba(51, 65, 85, 0.85) !important;
+}
+
+.dark [class*="text-slate-950"],
+.dark [class*="text-slate-900"],
+.dark [class*="text-slate-800"],
+.dark [class*="text-slate-700"] {
+  color: #F8FAFC !important;
+}
+
+.dark [class*="text-slate-600"] {
+  color: #CBD5E1 !important;
+}
+
+.dark [class*="text-slate-500"] {
+  color: #94A3B8 !important;
+}
+
+.dark [class*="border-slate-200"],
+.dark [class*="border-slate-300"] {
+  border-color: rgba(51, 65, 85, 0.75) !important;
+}
+
+/* Bulletproof Automated Dark Overrides for Pastel Boxes */
+.dark [class*="bg-emerald-50"] {
+  background-color: rgba(6, 78, 59, 0.45) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+.dark [class*="text-emerald-700"],
+.dark [class*="text-emerald-800"],
+.dark [class*="text-emerald-900"] {
+  color: #6EE7B7 !important;
+}
+
+.dark [class*="bg-rose-50"] {
+  background-color: rgba(136, 19, 55, 0.45) !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+}
+.dark [class*="text-rose-700"],
+.dark [class*="text-rose-800"],
+.dark [class*="text-rose-900"] {
+  color: #FDA4AF !important;
+}
+
+.dark [class*="bg-amber-50"] {
+  background-color: rgba(120, 53, 15, 0.45) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+.dark [class*="text-amber-700"],
+.dark [class*="text-amber-800"],
+.dark [class*="text-amber-900"] {
+  color: #FCD34D !important;
+}
+
+.dark [class*="bg-indigo-50"] {
+  background-color: rgba(30, 58, 138, 0.45) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+.dark [class*="text-indigo-700"],
+.dark [class*="text-indigo-800"],
+.dark [class*="text-indigo-900"] {
+  color: #A5B4FC !important;
+}
+
+.dark [class*="bg-sky-50"] {
+  background-color: rgba(12, 74, 110, 0.45) !important;
+  border-color: rgba(14, 165, 233, 0.3) !important;
+}
+.dark [class*="text-sky-700"],
+.dark [class*="text-sky-800"],
+.dark [class*="text-sky-900"] {
+  color: #7DD3FC !important;
 }

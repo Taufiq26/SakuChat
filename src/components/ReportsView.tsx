@@ -155,12 +155,12 @@ export default function ReportsView() {
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-5">
       {/* Mode Switcher Tabs */}
-      <div className="flex p-1.5 rounded-2xl bg-slate-200/80 border border-slate-300/60 gap-1.5 shadow-inner">
+      <div className="flex p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-800/90 border border-slate-300/60 dark:border-slate-700/80 gap-1.5 shadow-inner">
         <button
           onClick={() => setActiveTab('summary')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'summary'
-              ? 'bg-white text-indigo-600 shadow-md border border-slate-200'
-              : 'text-slate-600 hover:text-slate-900 font-bold'
+              ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200 dark:border-slate-700/80'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
             }`}
         >
           <PieIcon className="w-4 h-4" /> Ringkasan & Anomali
@@ -168,8 +168,8 @@ export default function ReportsView() {
         <button
           onClick={() => setActiveTab('annual')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'annual'
-              ? 'bg-white text-indigo-600 shadow-md border border-slate-200'
-              : 'text-slate-600 hover:text-slate-900 font-bold'
+              ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200 dark:border-slate-700/80'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
             }`}
         >
           <BarChart2 className="w-4 h-4" /> Analisa & Tren Bulanan (Setahun)
@@ -179,7 +179,7 @@ export default function ReportsView() {
       {activeTab === 'summary' ? (
         <>
           {/* Time Filter Tabs */}
-          <div className="flex p-1 rounded-full bg-slate-100/90 border border-slate-200/80 gap-1 shadow-inner">
+          <div className="flex p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70 gap-1 shadow-inner">
             {[
               { id: '7days', label: '7 Hari Terakhir' },
               { id: 'month', label: 'Bulan Ini' },
@@ -188,9 +188,9 @@ export default function ReportsView() {
               <button
                 key={item.id}
                 onClick={() => setFilter(item.id as 'all' | '7days' | 'month')}
-                className={`flex-1 py-2 rounded-full text-xs font-extrabold transition-all ${filter === item.id
-                    ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60'
-                    : 'text-slate-500 hover:text-slate-800 font-bold'
+                className={`flex-1 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${filter === item.id
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-bold'
                   }`}
               >
                 {item.label}
@@ -199,12 +199,12 @@ export default function ReportsView() {
           </div>
 
           {/* Total Card */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 border border-indigo-500/30 relative overflow-hidden shadow-lg">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
-            <span className="text-xs font-extrabold text-indigo-100 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-200" /> Total Pengeluaran ({filteredTransactions.length} Transaksi)
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 border border-indigo-500/30 dark:border-indigo-500/40 relative overflow-hidden shadow-lg dark:shadow-indigo-950/50">
+            <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 dark:bg-indigo-400/10 rounded-full blur-xl pointer-events-none" />
+            <span className="text-xs font-extrabold text-indigo-100 dark:text-indigo-300 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-indigo-200 dark:text-indigo-400" /> Total Pengeluaran ({filteredTransactions.length} Transaksi)
             </span>
-            <div className="text-3xl font-black mt-2 text-white tracking-tight">
+            <div className="text-3xl font-black mt-2 text-white dark:text-slate-100 tracking-tight">
               Rp {totalSpent.toLocaleString('id-ID')}
             </div>
           </div>
@@ -309,13 +309,13 @@ export default function ReportsView() {
 
           {/* Actionable Insights & Anomali */}
           <div className="space-y-3.5">
-            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-800">
+            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-800 dark:text-slate-100">
               <Sparkles className="w-4 h-4 text-amber-500" />
               <span>Actionable Insights & Anomali</span>
             </div>
 
             {alerts.length === 0 ? (
-              <div className="glass-panel p-5 text-center text-xs font-bold text-slate-600 bg-emerald-50/60 border-emerald-200/80">
+              <div className="glass-panel p-5 text-center text-xs font-bold text-slate-600 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/40 border-emerald-200/80 dark:border-emerald-800/80">
                 ✅ Semua pengeluaran dalam batas wajar. Tidak ditemukan lonjakan pengeluaran.
               </div>
             ) : (
@@ -323,25 +323,25 @@ export default function ReportsView() {
                 <div
                   key={alert.id}
                   className={`glass-panel p-5 sm:p-6 border-l-4 transition-all shadow-md ${alert.severity === 'high'
-                      ? 'border-l-rose-500 border-rose-200/80 bg-rose-50/80'
+                      ? 'border-l-rose-500 border-rose-200/80 dark:border-rose-900/80 bg-rose-50/80 dark:bg-rose-950/40'
                       : alert.severity === 'medium'
-                        ? 'border-l-amber-500 border-amber-200/80 bg-amber-50/80'
-                        : 'border-l-emerald-500 border-emerald-200/80 bg-emerald-50/80'
+                        ? 'border-l-amber-500 border-amber-200/80 dark:border-amber-900/80 bg-amber-50/80 dark:bg-amber-950/40'
+                        : 'border-l-emerald-500 border-emerald-200/80 dark:border-emerald-900/80 bg-emerald-50/80 dark:bg-emerald-950/40'
                     }`}
                 >
                   <div className="flex items-start gap-3.5">
                     <div className={`p-3 rounded-2xl shrink-0 shadow-xs ${alert.severity === 'high'
-                        ? 'bg-rose-100 text-rose-600'
+                        ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400'
                         : alert.severity === 'medium'
-                          ? 'bg-amber-100 text-amber-600'
-                          : 'bg-emerald-100 text-emerald-600'
+                          ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400'
+                          : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400'
                       }`}>
                       <AlertTriangle className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-black text-base text-slate-800 leading-snug">{alert.title}</h4>
-                      <p className="text-xs font-semibold text-slate-600 mt-1.5 leading-relaxed">{alert.description}</p>
-                      <div className="mt-3.5 p-3.5 rounded-2xl bg-white/90 border border-slate-200/80 text-xs font-bold text-slate-700 leading-normal flex items-start gap-2 shadow-inner">
+                      <h4 className="font-black text-base text-slate-800 dark:text-slate-100 leading-snug">{alert.title}</h4>
+                      <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">{alert.description}</p>
+                      <div className="mt-3.5 p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold text-slate-700 dark:text-slate-200 leading-normal flex items-start gap-2 shadow-inner">
                         <span className="text-base leading-none">💡</span>
                         <span>{alert.recommendation}</span>
                       </div>
@@ -354,13 +354,13 @@ export default function ReportsView() {
 
           {/* Top 3 Spending Categories */}
           <div className="glass-panel p-5 space-y-4">
-            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-800">
+            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-800 dark:text-slate-100">
               <Trophy className="w-4 h-4 text-amber-500" />
               <span>3 Kategori Pengeluaran Terbesar (Top Spending)</span>
             </div>
 
             {top3.length === 0 ? (
-              <p className="text-xs font-semibold text-slate-400 italic py-2">Belum ada data transaksi.</p>
+              <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 italic py-2">Belum ada data transaksi.</p>
             ) : (
               <div className="grid grid-cols-1 gap-3">
                 {top3.map((cat, idx) => {
@@ -368,7 +368,7 @@ export default function ReportsView() {
                   return (
                     <div
                       key={cat.category}
-                      className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 flex items-center justify-between transition-all hover:border-indigo-300 shadow-xs"
+                      className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between transition-all hover:border-indigo-300 dark:hover:border-indigo-500/50 shadow-xs"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <span
@@ -378,11 +378,11 @@ export default function ReportsView() {
                           #{idx + 1}
                         </span>
                         <div className="min-w-0">
-                          <div className="font-black text-sm text-slate-800 break-words">{cat.category}</div>
-                          <div className="text-xs font-bold text-slate-500 mt-0.5">{cat.percentage}% dari total pengeluaran</div>
+                          <div className="font-black text-sm text-slate-800 dark:text-slate-100 break-words">{cat.category}</div>
+                          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">{cat.percentage}% dari total pengeluaran</div>
                         </div>
                       </div>
-                      <div className="font-black text-sm text-emerald-600 shrink-0">
+                      <div className="font-black text-sm text-emerald-600 dark:text-emerald-400 shrink-0">
                         Rp {cat.amount.toLocaleString('id-ID')}
                       </div>
                     </div>
@@ -409,7 +409,7 @@ export default function ReportsView() {
                     onClick={() => setSelectedYear(yr)}
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${selectedYear === yr
                         ? 'bg-indigo-600 text-white shadow-md'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                   >
                     {yr}
@@ -418,8 +418,8 @@ export default function ReportsView() {
               </div>
             </div>
 
-            <div className="border-t border-slate-200/80 pt-3">
-              <div className="text-xs font-extrabold text-slate-700 mb-2">Pilih Kategori Pengeluaran:</div>
+            <div className="border-t border-slate-200/80 dark:border-slate-700/80 pt-3">
+              <div className="text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-2">Pilih Kategori Pengeluaran:</div>
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                 {availableCategories.map((cat) => {
                   const catColor = cat === 'SEMUA' ? '#6366F1' : (CATEGORY_COLORS[cat] || '#818CF8');
@@ -428,8 +428,8 @@ export default function ReportsView() {
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${selectedCategory === cat
-                          ? 'bg-slate-800 text-white shadow-md'
-                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                          ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-md'
+                          : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                     >
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: catColor }} />
@@ -442,25 +442,25 @@ export default function ReportsView() {
           </div>
 
           {/* Annual Summary Stats Card */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 border border-indigo-500/30 relative overflow-hidden shadow-lg text-white">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 border border-indigo-500/30 dark:border-indigo-500/40 relative overflow-hidden shadow-lg dark:shadow-indigo-950/50 text-white dark:text-slate-100">
+            <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 dark:bg-indigo-400/10 rounded-full blur-xl pointer-events-none" />
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div>
-                <span className="text-xs font-extrabold text-indigo-100 uppercase tracking-wider">
+                <span className="text-xs font-extrabold text-indigo-100 dark:text-indigo-300 uppercase tracking-wider">
                   Total {selectedCategory === 'SEMUA' ? 'Semua Kategori' : selectedCategory} ({selectedYear})
                 </span>
                 <div className="text-3xl font-black mt-1 tracking-tight">
                   Rp {annualInsights.yearlyTotal.toLocaleString('id-ID')}
                 </div>
               </div>
-              <div className="flex items-center gap-4 bg-white/10 px-4 py-3 rounded-2xl backdrop-blur-md border border-white/15">
+              <div className="flex items-center gap-4 bg-white/10 dark:bg-slate-800/60 px-4 py-3 rounded-2xl backdrop-blur-md border border-white/15 dark:border-slate-700/60">
                 <div>
-                  <div className="text-[10px] uppercase font-bold text-indigo-200">Rata-Rata / Bulan</div>
+                  <div className="text-[10px] uppercase font-bold text-indigo-200 dark:text-indigo-300">Rata-Rata / Bulan</div>
                   <div className="text-sm font-black mt-0.5">Rp {Math.round(annualInsights.avgMonthly).toLocaleString('id-ID')}</div>
                 </div>
-                <div className="h-8 w-px bg-white/20" />
+                <div className="h-8 w-px bg-white/20 dark:bg-slate-700" />
                 <div>
-                  <div className="text-[10px] uppercase font-bold text-indigo-200">Frekuensi Transaksi</div>
+                  <div className="text-[10px] uppercase font-bold text-indigo-200 dark:text-indigo-300">Frekuensi Transaksi</div>
                   <div className="text-sm font-black mt-0.5">{annualInsights.yearlyCount} Transaksi</div>
                 </div>
               </div>
@@ -516,44 +516,44 @@ export default function ReportsView() {
           </div>
 
           {/* Automated AI Insights & Conclusion Card */}
-          <div className="glass-panel p-5 sm:p-6 bg-gradient-to-br from-amber-50/90 via-orange-50/60 to-white border-amber-200/80 space-y-4 shadow-md">
-            <div className="flex items-center gap-2.5 font-black text-base text-slate-800">
-              <div className="p-2 rounded-xl bg-amber-100 text-amber-600 shrink-0">
+          <div className="glass-panel p-5 sm:p-6 bg-gradient-to-br from-amber-50/90 via-orange-50/60 to-white dark:from-slate-900 dark:via-slate-900/95 dark:to-slate-900 border-amber-200/80 dark:border-amber-500/30 space-y-4 shadow-md">
+            <div className="flex items-center gap-2.5 font-black text-base text-slate-800 dark:text-slate-100">
+              <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shrink-0">
                 <Lightbulb className="w-5 h-5" />
               </div>
               <span>Insight & Kesimpulan Otomatis ({selectedYear})</span>
             </div>
 
             {annualInsights.yearlyTotal === 0 ? (
-              <p className="text-xs font-semibold text-slate-500 italic leading-relaxed py-2">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic leading-relaxed py-2">
                 Belum ada pengeluaran tercatat pada kategori ini untuk tahun {selectedYear}.
               </p>
             ) : (
               <div className="space-y-3 pt-1">
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/80 border border-amber-100 text-xs font-semibold text-slate-700 shadow-xs">
+                <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/80 dark:bg-slate-800/90 border border-amber-100 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs">
                   <span className="text-rose-500 font-black text-base shrink-0 mt-0.5">📌</span>
                   <div className="leading-relaxed">
-                    <strong className="font-extrabold text-slate-900">Puncak Pengeluaran:</strong> Bulan <strong>{annualInsights.highestMonth.name}</strong> menjadi bulan pengeluaran terbesar dengan total <strong>Rp {annualInsights.highestMonth.amount.toLocaleString('id-ID')}</strong> ({((annualInsights.highestMonth.amount / annualInsights.yearlyTotal) * 100).toFixed(1)}% dari total pengeluaran setahun).
+                    <strong className="font-extrabold text-slate-900 dark:text-amber-400">Puncak Pengeluaran:</strong> Bulan <strong className="text-slate-900 dark:text-white">{annualInsights.highestMonth.name}</strong> menjadi bulan pengeluaran terbesar dengan total <strong className="text-slate-900 dark:text-white">Rp {annualInsights.highestMonth.amount.toLocaleString('id-ID')}</strong> ({((annualInsights.highestMonth.amount / annualInsights.yearlyTotal) * 100).toFixed(1)}% dari total pengeluaran setahun).
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/80 border border-amber-100 text-xs font-semibold text-slate-700 shadow-xs">
+                <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/80 dark:bg-slate-800/90 border border-amber-100 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs">
                   <span className="text-emerald-500 font-black text-base shrink-0 mt-0.5">📉</span>
                   <div className="leading-relaxed">
-                    <strong className="font-extrabold text-slate-900">Bulan Paling Hemat:</strong> Pengeluaran terendah terjadi pada <strong>{annualInsights.lowestActiveMonth.name}</strong> sebesar <strong>Rp {annualInsights.lowestActiveMonth.amount.toLocaleString('id-ID')}</strong>. Terdapat selisih <strong>Rp {(annualInsights.highestMonth.amount - annualInsights.lowestActiveMonth.amount).toLocaleString('id-ID')}</strong> antara puncak tertinggi dan terendah.
+                    <strong className="font-extrabold text-slate-900 dark:text-amber-400">Bulan Paling Hemat:</strong> Pengeluaran terendah terjadi pada <strong className="text-slate-900 dark:text-white">{annualInsights.lowestActiveMonth.name}</strong> sebesar <strong className="text-slate-900 dark:text-white">Rp {annualInsights.lowestActiveMonth.amount.toLocaleString('id-ID')}</strong>. Terdapat selisih <strong className="text-slate-900 dark:text-white">Rp {(annualInsights.highestMonth.amount - annualInsights.lowestActiveMonth.amount).toLocaleString('id-ID')}</strong> antara puncak tertinggi dan terendah.
                   </div>
                 </div>
 
                 {annualInsights.maxSpikeMonth && (
-                  <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/80 border border-amber-100 text-xs font-semibold text-slate-700 shadow-xs">
+                  <div className="flex items-start gap-3 p-3 rounded-2xl bg-white/80 dark:bg-slate-800/90 border border-amber-100 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs">
                     <span className="text-amber-500 font-black text-base shrink-0 mt-0.5">⚡</span>
                     <div className="leading-relaxed">
-                      <strong className="font-extrabold text-slate-900">Lonjakan Tercepat:</strong> Terjadi lonjakan paling tajam pada bulan <strong>{annualInsights.maxSpikeMonth.name}</strong> dengan kenaikan drastis <strong>+{annualInsights.maxSpikePercent}%</strong> dibanding bulan sebelumnya.
+                      <strong className="font-extrabold text-slate-900 dark:text-amber-400">Lonjakan Tercepat:</strong> Terjadi lonjakan paling tajam pada bulan <strong className="text-slate-900 dark:text-white">{annualInsights.maxSpikeMonth.name}</strong> dengan kenaikan drastis <strong className="text-slate-900 dark:text-white">+{annualInsights.maxSpikePercent}%</strong> dibanding bulan sebelumnya.
                     </div>
                   </div>
                 )}
 
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-xs font-bold leading-relaxed shadow-sm">
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-600 dark:from-indigo-600 dark:to-blue-700 text-white text-xs font-bold leading-relaxed shadow-sm">
                   💡 <strong>Kesimpulan & Rekomendasi:</strong> Untuk kestabilan arus kas tahun depan, disarankan mengantisipasi lonjakan kebutuhan di sekitar bulan <strong>{annualInsights.highestMonth.name}</strong>. Targetkan batas pengeluaran bulanan agar tidak jauh melampaui batas rata-rata <strong>Rp {Math.round(annualInsights.avgMonthly).toLocaleString('id-ID')} / bulan</strong>.
                 </div>
               </div>
@@ -562,49 +562,49 @@ export default function ReportsView() {
 
           {/* Month-by-Month Detailed Breakdown List */}
           <div className="glass-panel p-5 space-y-3.5">
-            <div className="font-extrabold text-sm text-slate-800">
+            <div className="font-extrabold text-sm text-slate-800 dark:text-slate-100">
               Rincian Perbandingan 12 Bulan ({selectedCategory === 'SEMUA' ? 'Semua Kategori' : selectedCategory})
             </div>
 
             <div className="space-y-2 pt-1">
               {annualMonthlyData.map((m, idx) => {
                 const prevAmount = idx > 0 ? annualMonthlyData[idx - 1].amount : 0;
-                let changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-500">Awal Tahun</span>;
+                let changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">Awal Tahun</span>;
 
                 if (idx > 0) {
                   if (prevAmount === 0 && m.amount > 0) {
-                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 flex items-center gap-0.5"><TrendingUp className="w-3 h-3" /> Baru</span>;
+                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center gap-0.5"><TrendingUp className="w-3 h-3" /> Baru</span>;
                   } else if (m.amount > prevAmount && prevAmount > 0) {
                     const diff = Math.round(((m.amount - prevAmount) / prevAmount) * 100);
-                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-rose-100 text-rose-600 flex items-center gap-0.5"><ArrowUpRight className="w-3.5 h-3.5" /> +{diff}%</span>;
+                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center gap-0.5"><ArrowUpRight className="w-3.5 h-3.5" /> +{diff}%</span>;
                   } else if (m.amount < prevAmount && prevAmount > 0) {
                     const diff = Math.round(((prevAmount - m.amount) / prevAmount) * 100);
-                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-600 flex items-center gap-0.5"><ArrowDownRight className="w-3.5 h-3.5" /> -{diff}%</span>;
+                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5"><ArrowDownRight className="w-3.5 h-3.5" /> -{diff}%</span>;
                   } else if (m.amount === prevAmount && m.amount > 0) {
-                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600">Stabil</span>;
+                    changeEl = <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">Stabil</span>;
                   } else {
-                    changeEl = <span className="text-[10px] font-bold text-slate-400">-</span>;
+                    changeEl = <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">-</span>;
                   }
                 }
 
                 return (
                   <div
                     key={m.monthIndex}
-                    className="p-3.5 rounded-2xl bg-white/90 border border-slate-200/80 flex items-center justify-between gap-3 shadow-xs hover:border-indigo-200 transition-all"
+                    className="p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-xs hover:border-indigo-200 dark:hover:border-indigo-500/50 transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 font-black text-xs text-slate-700 flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 font-black text-xs text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0">
                         {m.shortName}
                       </div>
                       <div className="min-w-0">
-                        <div className="font-extrabold text-xs text-slate-800 truncate">{m.name}</div>
-                        <div className="text-[11px] font-semibold text-slate-500 mt-0.5">{m.count} transaksi</div>
+                        <div className="font-extrabold text-xs text-slate-800 dark:text-slate-100 truncate">{m.name}</div>
+                        <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{m.count} transaksi</div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
                       {changeEl}
-                      <span className="font-black text-xs sm:text-sm text-slate-800 w-24 text-right">
+                      <span className="font-black text-xs sm:text-sm text-slate-800 dark:text-slate-100 w-24 text-right">
                         Rp {m.amount.toLocaleString('id-ID')}
                       </span>
                     </div>
