@@ -168,6 +168,8 @@ export function clearAllLocalData(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(TRANSACTIONS_KEY);
     localStorage.removeItem(MESSAGES_KEY);
+    localStorage.removeItem(LEARNED_KEYWORDS_KEY);
+    localStorage.removeItem('sakuchat_cloud_transactions_cache_v1');
   }
 }
 
