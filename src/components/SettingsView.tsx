@@ -5,6 +5,7 @@ import { Cloud, CheckCircle, Database, Shield, RefreshCw, LogIn, LogOut, Downloa
 import { getStoredTransactions, saveAllTransactions, clearAllLocalData } from '@/lib/storage';
 import { Transaction } from '@/types';
 import { getStoredSession, saveSession, logoutSession, autoMergeLocalTransactions, autoSyncIfOnline, UserSession, supabase } from '@/lib/supabase';
+import AlertModal from './AlertModal';
 
 interface SettingsViewProps {
   onDataReset: () => void;
@@ -16,6 +17,41 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
   const [localCount, setLocalCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error' | 'warning' | 'confirm';
+    title: string;
+    message: string;
+    confirmText?: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  });
+
+  const showAlert = (
+    type: 'success' | 'error' | 'warning' | 'confirm',
+    title: string,
+    message: string,
+    confirmText?: string,
+    onConfirm?: () => void
+  ) => {
+    setModalConfig({
+      isOpen: true,
+      type,
+      title,
+      message,
+      confirmText,
+      onConfirm,
+    });
+  };
+
+  const closeModal = () => {
+    setModalConfig((prev) => ({ ...prev, isOpen: false }));
+  };
 
   useEffect(() => {
     async function checkSessionAndHash() {
@@ -91,7 +127,7 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
         }
       });
       if (error) {
-        alert('Gagal membuka login Google: ' + error.message);
+        showAlert('error', 'Login Google Gagal', 'Gagal membuka login Google: ' + error.message);
         setIsSyncing(false);
         setSyncStatusMsg(null);
       }
@@ -144,11 +180,18 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
   };
 
   const handleClearData = () => {
-    if (confirm('Apakah kamu yakin ingin menghapus semua data pengeluaran dan riwayat chat secara permanen di perangkat ini?')) {
-      clearAllLocalData();
-      setLocalCount(0);
-      onDataReset();
-    }
+    showAlert(
+      'confirm',
+      'Hapus Data Permanen?',
+      'Apakah kamu yakin ingin menghapus semua data pengeluaran dan riwayat obrolan secara permanen di perangkat ini?',
+      'Ya, Hapus Semua',
+      () => {
+        clearAllLocalData();
+        setLocalCount(0);
+        onDataReset();
+        closeModal();
+      }
+    );
   };
 
   const handleExportJSON = () => {
@@ -173,7 +216,7 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
       const text = await file.text();
       const parsed = JSON.parse(text);
       if (!Array.isArray(parsed)) {
-        alert('Format file tidak valid! File backup harus berisi daftar (array) transaksi JSON.');
+        showAlert('error', 'Format File Tidak Valid', 'File backup harus berisi daftar (array) transaksi JSON SakuChat yang sah.');
         return;
       }
 
@@ -213,12 +256,12 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
           autoSyncIfOnline();
         }
         setSyncStatusMsg(`✅ Berhasil mengimpor ${addedCount} transaksi baru ke penyimpanan lokal!`);
-        alert(`Berhasil mengimpor ${addedCount} transaksi baru!`);
+        showAlert('success', 'Impor Berhasil!', `Berhasil mengimpor ${addedCount} transaksi baru ke penyimpanan lokal!`);
       } else {
-        alert('Semua transaksi di dalam file backup sudah ada di perangkat ini (tidak ada duplikasi yang ditambahkan).');
+        showAlert('warning', 'Data Sudah Tersedia', 'Semua transaksi di dalam file backup sudah ada di perangkat ini (tidak ada duplikasi yang ditambahkan).');
       }
     } catch (error) {
-      alert('Gagal mengimpor file backup. Pastikan file berformat JSON yang valid.');
+      showAlert('error', 'Gagal Membaca File', 'Gagal mengimpor file backup. Pastikan file berformat JSON yang sah dan tidak rusak.');
     } finally {
       if (event.target) event.target.value = '';
     }
@@ -350,11 +393,21 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
         </p>
         <button
           onClick={handleClearData}
-          className="w-full py-3 rounded-xl bg-white hover:bg-rose-100 border border-rose-300 text-rose-600 font-extrabold text-xs transition-all shadow-xs"
+          className="w-full py-3 rounded-xl bg-white hover:bg-rose-100 border border-rose-300 text-rose-600 font-extrabold text-xs transition-all shadow-xs cursor-pointer"
         >
           Hapus Semua Data Lokal (Reset)
         </button>
       </div>
+
+      <AlertModal
+        isOpen={modalConfig.isOpen}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        confirmText={modalConfig.confirmText}
+        onConfirm={modalConfig.onConfirm}
+        onClose={closeModal}
+      />
     </div>
   );
 }

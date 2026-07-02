@@ -58,8 +58,8 @@ export default function Navbar({ onOpenSettings }: NavbarProps) {
   return (
     <header className="px-5 py-3.5 bg-white/90 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between z-20 shrink-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-indigo-500/15 shrink-0 bg-slate-900 border border-slate-700/50">
-          <img src="/icon-192.png" alt="SakuChat Logo" className="w-full h-full object-cover" />
+        <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md shadow-indigo-500/15 shrink-0 border border-slate-200/80 ring-2 ring-indigo-50 transition-transform hover:scale-105 duration-200">
+          <img src="/icon-512.png" alt="SakuChat Logo" className="w-full h-full object-cover" />
         </div>
         <div>
           <h1 className="font-extrabold text-lg leading-tight tracking-tight text-slate-800">
