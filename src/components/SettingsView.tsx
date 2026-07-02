@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Cloud, CheckCircle, Database, Shield, RefreshCw, LogIn, LogOut, Download, AlertCircle, MailCheck, KeyRound, ArrowLeft } from 'lucide-react';
-import { getStoredTransactions, clearAllLocalData } from '@/lib/storage';
-import { getStoredSession, saveSession, logoutSession, autoMergeLocalTransactions, UserSession, supabase } from '@/lib/supabase';
+import React, { useState, useEffect, useRef } from 'react';
+import { Cloud, CheckCircle, Database, Shield, RefreshCw, LogIn, LogOut, Download, Upload, AlertCircle, MailCheck, KeyRound, ArrowLeft } from 'lucide-react';
+import { getStoredTransactions, saveAllTransactions, clearAllLocalData } from '@/lib/storage';
+import { Transaction } from '@/types';
+import { getStoredSession, saveSession, logoutSession, autoMergeLocalTransactions, autoSyncIfOnline, UserSession, supabase } from '@/lib/supabase';
 
 interface SettingsViewProps {
   onDataReset: () => void;
@@ -14,6 +15,7 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
   const [localCount, setLocalCount] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function checkSessionAndHash() {
@@ -159,6 +161,69 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
     a.click();
   };
 
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) {
+        alert('Format file tidak valid! File backup harus berisi daftar (array) transaksi JSON.');
+        return;
+      }
+
+      const current = getStoredTransactions();
+      const existingIds = new Set(current.map((t) => t.id));
+      const existingSignatures = new Set(current.map((t) => `${t.date}_${t.amount}_${t.rawText}`));
+
+      let addedCount = 0;
+      const validImports: Transaction[] = [];
+
+      for (const item of parsed) {
+        if (item && typeof item === 'object' && typeof item.amount === 'number' && typeof item.rawText === 'string') {
+          const id = item.id || `import-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+          const signature = `${item.date}_${item.amount}_${item.rawText}`;
+          if (!existingIds.has(id) && !existingSignatures.has(signature)) {
+            validImports.push({
+              id,
+              userId: session.isLoggedIn ? session.email : undefined,
+              rawText: item.rawText,
+              amount: item.amount,
+              category: item.category || 'Lainnya',
+              date: item.date || new Date().toISOString(),
+              isSynced: false
+            });
+            existingIds.add(id);
+            existingSignatures.add(signature);
+            addedCount++;
+          }
+        }
+      }
+
+      if (validImports.length > 0) {
+        const merged = [...validImports, ...current];
+        saveAllTransactions(merged);
+        setLocalCount(merged.length);
+        if (navigator.onLine && session.isLoggedIn) {
+          autoSyncIfOnline();
+        }
+        setSyncStatusMsg(`✅ Berhasil mengimpor ${addedCount} transaksi baru ke penyimpanan lokal!`);
+        alert(`Berhasil mengimpor ${addedCount} transaksi baru!`);
+      } else {
+        alert('Semua transaksi di dalam file backup sudah ada di perangkat ini (tidak ada duplikasi yang ditambahkan).');
+      }
+    } catch (error) {
+      alert('Gagal mengimpor file backup. Pastikan file berformat JSON yang valid.');
+    } finally {
+      if (event.target) event.target.value = '';
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-5">
       {/* Cloud Sync & Auto-Merge Card */}
@@ -233,22 +298,44 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
           Secara standar, seluruh transaksi dan percakapanmu disimpan 100% secara privat di peramban pengguna melalui penyimpanan lokal (<span className="font-mono text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded text-[11px] font-bold">localStorage</span>). Aplikasi berfungsi penuh tanpa koneksi internet.
         </p>
 
-        <div className="grid grid-cols-2 gap-3.5 pt-1">
-          <div className="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-xs">
-            <div className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
-              <Database className="w-3.5 h-3.5 text-indigo-500" /> Transaksi Lokal
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept=".json"
+          className="hidden"
+        />
+
+        <div className="space-y-3 pt-1">
+          {/* Transaksi Lokal Banner */}
+          <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div className="text-xs font-bold text-slate-600 flex items-center gap-2">
+              <Database className="w-4 h-4 text-indigo-500" /> Transaksi Tersimpan Lokal
             </div>
-            <div className="text-xl font-black text-slate-800 mt-1.5 tracking-tight">{localCount} Item</div>
+            <div className="px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-black text-sm">{localCount} Item</div>
           </div>
-          <button
-            onClick={handleExportJSON}
-            className="p-3.5 rounded-2xl bg-slate-50/90 hover:bg-indigo-50/80 border border-slate-200/80 hover:border-indigo-300 text-left transition-all flex flex-col justify-between shadow-xs group"
-          >
-            <div className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
-              <Download className="w-3.5 h-3.5 text-emerald-500 group-hover:-translate-y-0.5 transition-transform" /> Ekspor Data
-            </div>
-            <div className="text-xs font-extrabold text-emerald-600 mt-1.5">Unduh Backup JSON</div>
-          </button>
+
+          {/* Ekspor & Impor Side by Side */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleExportJSON}
+              className="p-3.5 rounded-2xl bg-slate-50/90 hover:bg-emerald-50/90 border border-slate-200/80 hover:border-emerald-300 text-center transition-all flex flex-col items-center justify-center shadow-xs group cursor-pointer"
+            >
+              <div className="text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5">
+                <Download className="w-3.5 h-3.5 text-emerald-500 group-hover:-translate-y-0.5 transition-transform shrink-0" /> Ekspor Data
+              </div>
+              <div className="text-[11px] font-extrabold text-emerald-600 mt-1">Unduh Backup JSON</div>
+            </button>
+            <button
+              onClick={handleImportClick}
+              className="p-3.5 rounded-2xl bg-slate-50/90 hover:bg-sky-50/90 border border-slate-200/80 hover:border-sky-300 text-center transition-all flex flex-col items-center justify-center shadow-xs group cursor-pointer"
+            >
+              <div className="text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5">
+                <Upload className="w-3.5 h-3.5 text-sky-500 group-hover:-translate-y-0.5 transition-transform shrink-0" /> Impor Data
+              </div>
+              <div className="text-[11px] font-extrabold text-sky-600 mt-1">Pulihkan Backup JSON</div>
+            </button>
+          </div>
         </div>
       </div>
 

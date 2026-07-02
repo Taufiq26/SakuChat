@@ -90,6 +90,12 @@ export function deleteTransaction(id: string): Transaction[] {
   return updated;
 }
 
+export function saveAllTransactions(transactions: Transaction[]): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
+  }
+}
+
 export function getLearnedKeywords(): Record<string, CategoryName> {
   if (typeof window === 'undefined') return {};
   const stored = localStorage.getItem(LEARNED_KEYWORDS_KEY);
