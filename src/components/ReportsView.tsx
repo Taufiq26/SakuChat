@@ -1,10 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { PieChart as PieIcon, AlertTriangle, Sparkles, Trophy, Calendar, BarChart2, TrendingUp, TrendingDown, Lightbulb, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { PieChart as PieIcon, AlertTriangle, Sparkles, Trophy, Calendar, BarChart2, TrendingUp, TrendingDown, Lightbulb, ArrowUpRight, ArrowDownRight, X } from 'lucide-react';
 import { Transaction } from '@/types';
 import { getStoredTransactions, getCategoryDistribution, getTopSpending, getAnomalyAlerts } from '@/lib/storage';
 import { CATEGORY_COLORS } from '@/lib/parser';
+
+interface DetailModalInfo {
+  isOpen: boolean;
+  title: string;
+  subtitle: string;
+  transactions: Transaction[];
+}
 
 export default function ReportsView() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -12,6 +19,7 @@ export default function ReportsView() {
   const [filter, setFilter] = useState<'all' | '7days' | 'month'>('7days');
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedCategory, setSelectedCategory] = useState<string>('SEMUA');
+  const [detailModal, setDetailModal] = useState<DetailModalInfo | null>(null);
 
   useEffect(() => {
     const txs = getStoredTransactions();
@@ -368,7 +376,19 @@ export default function ReportsView() {
                   return (
                     <div
                       key={cat.category}
-                      className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between transition-all hover:border-indigo-300 dark:hover:border-indigo-500/50 shadow-xs"
+                      onClick={() => {
+                        const catTxs = filteredTransactions
+                          .filter((t) => t.category === cat.category)
+                          .sort((a, b) => b.amount - a.amount);
+                        const filterLabel = filter === '7days' ? '7 Hari Terakhir' : filter === 'month' ? 'Bulan Ini' : 'Semua Data';
+                        setDetailModal({
+                          isOpen: true,
+                          title: `Top Spending: ${cat.category}`,
+                          subtitle: `Periode: ${filterLabel} • Total: Rp ${cat.amount.toLocaleString('id-ID')}`,
+                          transactions: catTxs
+                        });
+                      }}
+                      className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between transition-all hover:border-indigo-300 dark:hover:border-indigo-500/50 shadow-xs cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <span
@@ -590,7 +610,25 @@ export default function ReportsView() {
                 return (
                   <div
                     key={m.monthIndex}
-                    className="p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-xs hover:border-indigo-200 dark:hover:border-indigo-500/50 transition-all"
+                    onClick={() => {
+                      if (m.count === 0) return;
+                      const monthTxs = transactions
+                        .filter((t) => {
+                          const d = new Date(t.date);
+                          return d.getFullYear() === selectedYear &&
+                                 d.getMonth() === m.monthIndex &&
+                                 (selectedCategory === 'SEMUA' || t.category === selectedCategory);
+                        })
+                        .sort((a, b) => b.amount - a.amount);
+
+                      setDetailModal({
+                        isOpen: true,
+                        title: `Rincian Pengeluaran: ${m.name} ${selectedYear}`,
+                        subtitle: `Kategori: ${selectedCategory === 'SEMUA' ? 'Semua Kategori' : selectedCategory} • Total: Rp ${m.amount.toLocaleString('id-ID')}`,
+                        transactions: monthTxs
+                      });
+                    }}
+                    className={`p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-3 shadow-xs transition-all ${m.count > 0 ? 'cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:scale-[1.01] active:scale-[0.99]' : 'opacity-70 cursor-default'}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 font-black text-xs text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0">
@@ -611,6 +649,77 @@ export default function ReportsView() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Transactions Modal */}
+      {detailModal && detailModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[82vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
+              <div className="min-w-0">
+                <h3 className="font-black text-base text-slate-800 dark:text-slate-100 truncate">{detailModal.title}</h3>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{detailModal.subtitle}</p>
+              </div>
+              <button
+                onClick={() => setDetailModal(null)}
+                className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all shrink-0 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal List Content */}
+            <div className="p-4 overflow-y-auto space-y-2.5 flex-1">
+              {detailModal.transactions.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-xs font-semibold italic">
+                  Tidak ada transaksi untuk kriteria ini.
+                </div>
+              ) : (
+                detailModal.transactions.map((tx) => {
+                  const catColor = CATEGORY_COLORS[tx.category] || '#818CF8';
+                  const dateFormatted = new Date(tx.date).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                  });
+                  return (
+                    <div
+                      key={tx.id}
+                      className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-sm text-slate-800 dark:text-slate-100 break-words">{tx.rawText}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span
+                            className="text-[10px] font-black px-2 py-0.5 rounded-md text-white shrink-0"
+                            style={{ backgroundColor: catColor }}
+                          >
+                            {tx.category}
+                          </span>
+                          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">{dateFormatted}</span>
+                        </div>
+                      </div>
+                      <div className="font-black text-sm text-emerald-600 dark:text-emerald-400 shrink-0">
+                        Rp {tx.amount.toLocaleString('id-ID')}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex justify-end">
+              <button
+                onClick={() => setDetailModal(null)}
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-md cursor-pointer"
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>
