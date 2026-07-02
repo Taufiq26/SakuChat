@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Cloud, CheckCircle, Database, Shield, RefreshCw, LogIn, LogOut, Download, Upload, AlertCircle, MailCheck, KeyRound, ArrowLeft, Sun, Moon } from 'lucide-react';
+import { Cloud, CheckCircle, Database, Shield, RefreshCw, LogIn, LogOut, Download, Upload, AlertCircle, MailCheck, KeyRound, ArrowLeft, Sun, Moon, MessageCircleHeart, ExternalLink } from 'lucide-react';
 import { getStoredTransactions, saveAllTransactions, clearAllLocalData } from '@/lib/storage';
 import { Transaction } from '@/types';
 import { getStoredSession, saveSession, logoutSession, autoMergeLocalTransactions, autoSyncIfOnline, deleteAllCloudTransactions, UserSession, supabase } from '@/lib/supabase';
@@ -467,6 +467,29 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
             <span className="text-xs">Tema Gelap</span>
           </button>
         </div>
+      </div>
+
+      {/* Feedback & Support Card */}
+      <div className="glass-panel p-5 space-y-3.5 border-indigo-200/80 dark:border-indigo-800/80 bg-gradient-to-br from-indigo-50/80 via-purple-50/60 to-pink-50/80 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-pink-950/40 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-extrabold text-sm text-indigo-900 dark:text-indigo-200">
+            <MessageCircleHeart className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+            <span>Kritik, Saran & Bantuan</span>
+          </div>
+        </div>
+        <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+          Punya kendala, kritik, ide fitur baru, atau masukan terkait SakuChat? Hubungi pengembang secara langsung untuk menyampaikan masukanmu.
+        </p>
+        <a
+          href="https://www.instagram.com/gwetaufiq/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-extrabold text-xs transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+        >
+          <MessageCircleHeart className="w-4 h-4" />
+          <span>Hubungi via DM Instagram @gwetaufiq</span>
+          <ExternalLink className="w-3.5 h-3.5 ml-0.5 opacity-80" />
+        </a>
       </div>
 
       {/* Danger Zone */}
