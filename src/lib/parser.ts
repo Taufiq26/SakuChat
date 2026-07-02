@@ -73,25 +73,13 @@ function extractNaturalLanguageDate(text: string): { dateISO?: string; dateLabel
     return { dateISO: new Date(now.getTime() - 1 * 86400000).toISOString(), dateLabel: 'kemarin' };
   }
 
-  // 2. Singular / "se-" relative terms (seminggu lalu, sebulan lalu, setahun lalu)
-  if (/\b(?:se|1\s*)minggu\s+(?:yang\s+)?lalu\b|\bminggu\s+lalu\b/i.test(text)) {
-    return { dateISO: new Date(now.getTime() - 7 * 86400000).toISOString(), dateLabel: 'seminggu lalu' };
-  }
-  if (/\b(?:se|1\s*)bulan\s+(?:yang\s+)?lalu\b|\bbulan\s+lalu\b/i.test(text)) {
-    return { dateISO: new Date(now.getTime() - 30 * 86400000).toISOString(), dateLabel: 'sebulan lalu' };
-  }
-  if (/\b(?:se|1\s*)tahun\s+(?:yang\s+)?lalu\b|\btahun\s+lalu\b/i.test(text)) {
-    const d = new Date(now);
-    d.setFullYear(d.getFullYear() - 1);
-    return { dateISO: d.toISOString(), dateLabel: 'setahun lalu' };
-  }
-
-  // 3. Multi-unit relative terms (X hari/minggu/bulan/tahun lalu)
-  const timeAgoMatch = text.match(/\b(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh)\s+(hari|hri|minggu|mggu|bulan|bln|tahun|thn|taon)\s+(?:yang\s+)?(?:lalu|llu|silam|kemaren)\b/i);
+  // 2. Multi-unit relative terms (X hari/minggu/bulan/tahun lalu)
+  const timeAgoMatch = text.match(/\b(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|duabelas)\s+(hari|hri|minggu|mggu|bulan|bln|tahun|thn|taon)\s+(?:yang\s+)?(?:lalu|llu|silam|kemaren)\b/i);
   if (timeAgoMatch) {
     const wordToNum: Record<string, number> = {
       'satu': 1, 'dua': 2, 'tiga': 3, 'empat': 4, 'lima': 5,
-      'enam': 6, 'tujuh': 7, 'delapan': 8, 'sembilan': 9, 'sepuluh': 10
+      'enam': 6, 'tujuh': 7, 'delapan': 8, 'sembilan': 9, 'sepuluh': 10,
+      'sebelas': 11, 'duabelas': 12
     };
     let num = parseInt(timeAgoMatch[1], 10);
     if (isNaN(num)) num = wordToNum[timeAgoMatch[1].toLowerCase()] || 1;
@@ -113,6 +101,21 @@ function extractNaturalLanguageDate(text: string): { dateISO?: string; dateLabel
       unitLabel = 'hari';
     }
     return { dateISO: d.toISOString(), dateLabel: `${num} ${unitLabel} lalu` };
+  }
+
+  // 3. Singular / "se-" relative terms (seminggu lalu, sebulan lalu, setahun lalu)
+  if (/\b(?:se|1\s*)minggu\s+(?:yang\s+)?lalu\b/i.test(text) || /(?<!\d+\s+)\bminggu\s+lalu\b/i.test(text)) {
+    return { dateISO: new Date(now.getTime() - 7 * 86400000).toISOString(), dateLabel: 'seminggu lalu' };
+  }
+  if (/\b(?:se|1\s*)bulan\s+(?:yang\s+)?lalu\b/i.test(text) || /(?<!\d+\s+)\bbulan\s+lalu\b/i.test(text)) {
+    const d = new Date(now);
+    d.setMonth(d.getMonth() - 1);
+    return { dateISO: d.toISOString(), dateLabel: 'sebulan lalu' };
+  }
+  if (/\b(?:se|1\s*)tahun\s+(?:yang\s+)?lalu\b/i.test(text) || /(?<!\d+\s+)\btahun\s+lalu\b/i.test(text)) {
+    const d = new Date(now);
+    d.setFullYear(d.getFullYear() - 1);
+    return { dateISO: d.toISOString(), dateLabel: 'setahun lalu' };
   }
 
   // 4. Specific dates: DD Month YYYY (e.g. "20 April 2025" or "20 apr 25")
@@ -202,6 +205,9 @@ export function parseExpenseInput(rawInput: string): ParsedExpense {
     }
   }
 
+  // Extract Date early so early returns preserve date parsing
+  const { dateISO, dateLabel } = extractNaturalLanguageDate(text);
+
   // 2. Determine Category
   let matchedCategory: CategoryName = 'Lainnya';
 
@@ -216,7 +222,9 @@ export function parseExpenseInput(rawInput: string): ParsedExpense {
             return {
               amount,
               category: cat,
-              cleanDescription: rawInput.trim()
+              cleanDescription: rawInput.trim(),
+              dateISO,
+              dateLabel
             };
           }
         }
@@ -241,8 +249,6 @@ export function parseExpenseInput(rawInput: string): ParsedExpense {
       matchedCategory = catName as CategoryName;
     }
   }
-
-  const { dateISO, dateLabel } = extractNaturalLanguageDate(text);
 
   return {
     amount,
