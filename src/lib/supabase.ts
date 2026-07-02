@@ -246,7 +246,7 @@ export async function autoSyncIfOnline(): Promise<{ synced: boolean; count: numb
 
 export async function deleteCloudTransaction(id: string): Promise<void> {
   const session = getStoredSession();
-  if (!session.isLoggedIn || !supabase) return;
+  if (!supabase) return;
 
   try {
     const { data: { session: authSession } } = await supabase.auth.getSession();
@@ -254,8 +254,18 @@ export async function deleteCloudTransaction(id: string): Promise<void> {
     const dbClient = token ? (getAuthClient(token) || supabase) : supabase;
 
     if (dbClient) {
-      await dbClient.from('transactions').delete().eq('id', id).eq('user_id', session.email);
-      await dbClient.from('expenses').delete().eq('id', id).eq('user_id', session.email);
+      const uids = Array.from(new Set([
+        session.email,
+        authSession?.user?.id,
+        authSession?.user?.email
+      ].filter(Boolean))) as string[];
+
+      for (const uid of uids) {
+        await dbClient.from('transactions').delete().eq('id', id).eq('user_id', uid);
+        await dbClient.from('expenses').delete().eq('id', id).eq('user_id', uid);
+      }
+      await dbClient.from('transactions').delete().eq('id', id);
+      await dbClient.from('expenses').delete().eq('id', id);
     }
   } catch (err) {
     console.error('Failed to delete cloud transaction:', err);
@@ -282,7 +292,7 @@ export async function updateCloudTransactionCategory(id: string, newCategory: st
 
 export async function deleteAllCloudTransactions(): Promise<void> {
   const session = getStoredSession();
-  if (!session.isLoggedIn || !supabase) return;
+  if (!supabase) return;
 
   try {
     const { data: { session: authSession } } = await supabase.auth.getSession();
@@ -290,8 +300,18 @@ export async function deleteAllCloudTransactions(): Promise<void> {
     const dbClient = token ? (getAuthClient(token) || supabase) : supabase;
 
     if (dbClient) {
-      await dbClient.from('transactions').delete().eq('user_id', session.email);
-      await dbClient.from('expenses').delete().eq('user_id', session.email);
+      const uids = Array.from(new Set([
+        session.email,
+        authSession?.user?.id,
+        authSession?.user?.email
+      ].filter(Boolean))) as string[];
+
+      for (const uid of uids) {
+        const res1 = await dbClient.from('transactions').delete().eq('user_id', uid);
+        if (res1.error) console.error(`Error deleting transactions for ${uid}:`, res1.error);
+        const res2 = await dbClient.from('expenses').delete().eq('user_id', uid);
+        if (res2.error) console.error(`Error deleting expenses for ${uid}:`, res2.error);
+      }
     }
     saveSession({ ...session, syncedCount: 0 });
   } catch (err) {

@@ -158,9 +158,9 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
     setIsTyping(false);
   };
 
-  const handleDeleteTx = (txId: string) => {
+  const handleDeleteTx = async (txId: string) => {
     deleteTransaction(txId);
-    deleteCloudTransaction(txId);
+    await deleteCloudTransaction(txId);
     onTransactionUpdated();
     setMessages((prev) =>
       prev.map((m) =>
