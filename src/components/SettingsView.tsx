@@ -98,20 +98,25 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
         }
       }
 
+      const storedSess = getStoredSession();
       if (supabase) {
-        supabase.auth.getSession().then(({ data: { session: sbSession } }) => {
-          if (sbSession && sbSession.user && sbSession.user.email) {
-            autoMergeLocalTransactions(getStoredTransactions(), sbSession.user.email).then(({ mergedTransactions }) => {
-              const newSess: UserSession = {
-                email: sbSession.user.email!,
-                isLoggedIn: true,
-                syncedCount: mergedTransactions.length
-              };
-              saveSession(newSess);
-              setSession(newSess);
-            });
-          }
-        });
+        if (!storedSess.isLoggedIn) {
+          supabase.auth.signOut().catch(() => {});
+        } else {
+          supabase.auth.getSession().then(({ data: { session: sbSession } }) => {
+            if (sbSession && sbSession.user && sbSession.user.email) {
+              autoMergeLocalTransactions(getStoredTransactions(), sbSession.user.email).then(({ mergedTransactions }) => {
+                const newSess: UserSession = {
+                  email: sbSession.user.email!,
+                  isLoggedIn: true,
+                  syncedCount: mergedTransactions.length
+                };
+                saveSession(newSess);
+                setSession(newSess);
+              });
+            }
+          });
+        }
       }
     }
 

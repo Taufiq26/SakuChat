@@ -60,10 +60,17 @@ export default function HomePage() {
 
       if (supabase) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, sbSession) => {
+          const currentSess = getStoredSession();
+          if (event === 'INITIAL_SESSION' && !currentSess.isLoggedIn) {
+            if (sbSession) {
+              await supabase?.auth.signOut().catch(() => {});
+            }
+            return;
+          }
+
           if (sbSession && sbSession.user && sbSession.user.email) {
             const email = sbSession.user.email;
-            const currentSess = getStoredSession();
-            if (!currentSess.isLoggedIn || currentSess.email !== email) {
+            if ((event === 'SIGNED_IN' || currentSess.isLoggedIn) && (!currentSess.isLoggedIn || currentSess.email !== email)) {
               const txs = getStoredTransactions();
               const { mergedTransactions } = await autoMergeLocalTransactions(txs, email);
               if (typeof window !== 'undefined') {
