@@ -243,3 +243,58 @@ export async function autoSyncIfOnline(): Promise<{ synced: boolean; count: numb
   saveSession(updatedSession);
   return { synced: true, count: addedCount };
 }
+
+export async function deleteCloudTransaction(id: string): Promise<void> {
+  const session = getStoredSession();
+  if (!session.isLoggedIn || !supabase) return;
+
+  try {
+    const { data: { session: authSession } } = await supabase.auth.getSession();
+    const token = authSession?.access_token || getActiveAccessToken();
+    const dbClient = token ? (getAuthClient(token) || supabase) : supabase;
+
+    if (dbClient) {
+      await dbClient.from('transactions').delete().eq('id', id).eq('user_id', session.email);
+      await dbClient.from('expenses').delete().eq('id', id).eq('user_id', session.email);
+    }
+  } catch (err) {
+    console.error('Failed to delete cloud transaction:', err);
+  }
+}
+
+export async function updateCloudTransactionCategory(id: string, newCategory: string): Promise<void> {
+  const session = getStoredSession();
+  if (!session.isLoggedIn || !supabase) return;
+
+  try {
+    const { data: { session: authSession } } = await supabase.auth.getSession();
+    const token = authSession?.access_token || getActiveAccessToken();
+    const dbClient = token ? (getAuthClient(token) || supabase) : supabase;
+
+    if (dbClient) {
+      await dbClient.from('transactions').update({ category: newCategory }).eq('id', id).eq('user_id', session.email);
+      await dbClient.from('expenses').update({ category: newCategory }).eq('id', id).eq('user_id', session.email);
+    }
+  } catch (err) {
+    console.error('Failed to update cloud transaction category:', err);
+  }
+}
+
+export async function deleteAllCloudTransactions(): Promise<void> {
+  const session = getStoredSession();
+  if (!session.isLoggedIn || !supabase) return;
+
+  try {
+    const { data: { session: authSession } } = await supabase.auth.getSession();
+    const token = authSession?.access_token || getActiveAccessToken();
+    const dbClient = token ? (getAuthClient(token) || supabase) : supabase;
+
+    if (dbClient) {
+      await dbClient.from('transactions').delete().eq('user_id', session.email);
+      await dbClient.from('expenses').delete().eq('user_id', session.email);
+    }
+    saveSession({ ...session, syncedCount: 0 });
+  } catch (err) {
+    console.error('Failed to delete all cloud transactions:', err);
+  }
+}

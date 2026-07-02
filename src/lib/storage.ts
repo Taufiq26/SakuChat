@@ -86,6 +86,14 @@ export function deleteTransaction(id: string): Transaction[] {
   const updated = current.filter((t) => t.id !== id);
   if (typeof window !== 'undefined') {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
+    const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
+    if (storedCloud) {
+      try {
+        const cloudTxs: Transaction[] = JSON.parse(storedCloud);
+        const updatedCloud = cloudTxs.filter((t) => t.id !== id);
+        localStorage.setItem('sakuchat_cloud_transactions_cache_v1', JSON.stringify(updatedCloud));
+      } catch {}
+    }
   }
   return updated;
 }
@@ -137,6 +145,14 @@ export function updateTransactionCategory(id: string, newCategory: CategoryName)
   const updated = current.map((t) => (t.id === id ? { ...t, category: newCategory } : t));
   if (typeof window !== 'undefined') {
     localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
+    const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
+    if (storedCloud) {
+      try {
+        const cloudTxs: Transaction[] = JSON.parse(storedCloud);
+        const updatedCloud = cloudTxs.map((t) => (t.id === id ? { ...t, category: newCategory } : t));
+        localStorage.setItem('sakuchat_cloud_transactions_cache_v1', JSON.stringify(updatedCloud));
+      } catch {}
+    }
   }
   return updated;
 }

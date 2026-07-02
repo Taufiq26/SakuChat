@@ -5,6 +5,7 @@ import { Send, Trash2, Sparkles, Tag, ArrowRight, MessageSquarePlus, Calendar } 
 import { Transaction, ChatMessage, CategoryName } from '@/types';
 import { parseExpenseInput, parseExpenseInputAsync, CATEGORY_COLORS } from '@/lib/parser';
 import { getStoredMessages, saveMessage, getStoredTransactions, saveTransaction, deleteTransaction, updateTransactionCategory } from '@/lib/storage';
+import { deleteCloudTransaction, updateCloudTransactionCategory } from '@/lib/supabase';
 
 const ALL_CATEGORIES: CategoryName[] = [
   'Makanan & Minuman',
@@ -159,6 +160,7 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
 
   const handleDeleteTx = (txId: string) => {
     deleteTransaction(txId);
+    deleteCloudTransaction(txId);
     onTransactionUpdated();
     setMessages((prev) =>
       prev.map((m) =>
@@ -171,6 +173,7 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
 
   const handleCategoryChange = (txId: string, newCat: CategoryName) => {
     updateTransactionCategory(txId, newCat);
+    updateCloudTransactionCategory(txId, newCat);
     onTransactionUpdated();
     setMessages((prev) => [...prev]);
   };

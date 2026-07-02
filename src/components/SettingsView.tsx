@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Cloud, CheckCircle, Database, Shield, RefreshCw, LogIn, LogOut, Download, Upload, AlertCircle, MailCheck, KeyRound, ArrowLeft, Sun, Moon } from 'lucide-react';
 import { getStoredTransactions, saveAllTransactions, clearAllLocalData } from '@/lib/storage';
 import { Transaction } from '@/types';
-import { getStoredSession, saveSession, logoutSession, autoMergeLocalTransactions, autoSyncIfOnline, UserSession, supabase } from '@/lib/supabase';
+import { getStoredSession, saveSession, logoutSession, autoMergeLocalTransactions, autoSyncIfOnline, deleteAllCloudTransactions, UserSession, supabase } from '@/lib/supabase';
 import { getStoredTheme, applyTheme, ThemeMode } from '@/lib/theme';
 import { alignCategoryToStandard } from '@/lib/parser';
 import AlertModal from './AlertModal';
@@ -219,11 +219,14 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
     showAlert(
       'confirm',
       'Hapus Data Permanen?',
-      'Apakah kamu yakin ingin menghapus semua data pengeluaran dan riwayat obrolan secara permanen di perangkat ini?',
+      'Apakah kamu yakin ingin menghapus semua data pengeluaran dan riwayat obrolan secara permanen baik di perangkat ini maupun di cloud sinkronisasi?',
       'Ya, Hapus Semua',
-      () => {
+      async () => {
         clearAllLocalData();
+        await deleteAllCloudTransactions();
         setLocalCount(0);
+        setSession((prev) => ({ ...prev, syncedCount: 0 }));
+        setSyncStatusMsg('Semua data lokal dan cloud berhasil dihapus bersih.');
         onDataReset();
         closeModal();
       }
