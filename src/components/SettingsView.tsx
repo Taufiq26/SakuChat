@@ -6,6 +6,7 @@ import { getStoredTransactions, saveAllTransactions, clearAllLocalData } from '@
 import { Transaction } from '@/types';
 import { getStoredSession, saveSession, logoutSession, autoMergeLocalTransactions, autoSyncIfOnline, UserSession, supabase } from '@/lib/supabase';
 import { getStoredTheme, applyTheme, ThemeMode } from '@/lib/theme';
+import { alignCategoryToStandard } from '@/lib/parser';
 import AlertModal from './AlertModal';
 
 interface SettingsViewProps {
@@ -255,7 +256,7 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
               userId: session.isLoggedIn ? session.email : undefined,
               rawText: item.rawText,
               amount: item.amount,
-              category: item.category || 'Lainnya',
+              category: alignCategoryToStandard(item.category, item.rawText),
               date: item.date || new Date().toISOString(),
               isSynced: false
             });

@@ -294,3 +294,101 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'Edukasi & Investasi': '#6366F1',     // Indigo Blue
   'Lainnya': '#94A3B8'                 // Slate Gray
 };
+
+export const STANDARD_CATEGORIES: CategoryName[] = [
+  'Makanan & Minuman',
+  'Transportasi',
+  'Kebutuhan Rumah Tangga',
+  'Kebutuhan Pribadi',
+  'Tagihan & Utilitas',
+  'Sosial & Sedekah',
+  'Hiburan & Liburan',
+  'Kesehatan',
+  'Edukasi & Investasi',
+  'Lainnya'
+];
+
+/**
+ * Smart Category Alignment: Automatically maps any manual/custom imported category
+ * or non-standard category string into one of SakuChat's 10 standardized categories.
+ */
+export function alignCategoryToStandard(customCatInput?: string, rawText?: string): CategoryName {
+  if (!customCatInput || !customCatInput.trim()) {
+    if (rawText) {
+      return parseExpenseInput(rawText).category;
+    }
+    return 'Lainnya';
+  }
+
+  const cleanCat = customCatInput.trim();
+
+  // 1. Check exact match (case-insensitive) against existing standard categories
+  for (const std of STANDARD_CATEGORIES) {
+    if (std.toLowerCase() === cleanCat.toLowerCase()) {
+      return std;
+    }
+  }
+
+  // 2. Keyword/Synonym alignment dictionary for non-standard or manual categories
+  const lowerCat = cleanCat.toLowerCase();
+
+  const SYNONYM_MAP: Record<CategoryName, string[]> = {
+    'Makanan & Minuman': [
+      'makan', 'minum', 'jajan', 'kuliner', 'snack', 'cafe', 'kafe', 'resto',
+      'sarapan', 'siang', 'malam', 'roti', 'kopi', 'cemilan', 'gofood',
+      'shopeefood', 'grabfood', 'bahan pokok', 'sembako', 'daging', 'sayur', 'buah', 'kue', 'groceries'
+    ],
+    'Transportasi': [
+      'transport', 'transportasi', 'bensin', 'ojek', 'grab', 'gojek', 'gocar', 'goride',
+      'parkir', 'tol', 'servis motor', 'servis mobil', 'kendaraan', 'ongkir', 'ongkos kirim',
+      'taxi', 'taksi', 'krl', 'mrt', 'kereta', 'bus', 'motor', 'mobil', 'bengkel', 'travel', 'fuel'
+    ],
+    'Kebutuhan Rumah Tangga': [
+      'rumah tangga', 'belanja bulanan', 'dapur', 'belanja dapur', 'supermarket', 'galon',
+      'gas', 'laundry', 'perabot', 'kebersihan', 'sabun cuci', 'alat rumah', 'household', 'keperluan rumah'
+    ],
+    'Kebutuhan Pribadi': [
+      'pribadi', 'belanja pribadi', 'skincare', 'pakaian', 'baju', 'sepatu', 'salon',
+      'cukur', 'makeup', 'kosmetik', 'fashion', 'aksesoris', 'tas', 'perawatan', 'personal'
+    ],
+    'Tagihan & Utilitas': [
+      'tagihan', 'utilitas', 'listrik', 'pln', 'air', 'pdam', 'internet', 'wifi',
+      'pulsa', 'paket data', 'langganan', 'netflix', 'spotify', 'bpjs', 'cicilan',
+      'sewa', 'kontrakan', 'bayar hutang', 'pinjol', 'kartu kredit', 'asuransi', 'bill', 'utility', 'utilities', 'kredit'
+    ],
+    'Sosial & Sedekah': [
+      'sosial', 'sedekah', 'zakat', 'infaq', 'infak', 'sumbangan', 'donasi', 'hadiah',
+      'kondangan', 'amplop', 'kado', 'traktir', 'keluarga', 'ortu', 'orang tua', 'charity', 'gift'
+    ],
+    'Hiburan & Liburan': [
+      'hiburan', 'liburan', 'rekreasi', 'nonton', 'bioskop', 'game', 'gaming',
+      'topup', 'top up', 'wisata', 'healing', 'staycation', 'jalan-jalan', 'karaoke', 'hobi', 'entertainment'
+    ],
+    'Kesehatan': [
+      'kesehatan', 'obat', 'apotek', 'dokter', 'rumah sakit', 'klinik', 'vitamin', 'suplemen', 'medis', 'health', 'medical'
+    ],
+    'Edukasi & Investasi': [
+      'edukasi', 'pendidikan', 'sekolah', 'kuliah', 'buku', 'kursus', 'pelatihan',
+      'spp', 'les', 'investasi', 'reksadana', 'saham', 'emas', 'tabungan', 'crypto', 'kripto', 'education', 'investment'
+    ],
+    'Lainnya': ['lainnya', 'lain-lain', 'other', 'umum']
+  };
+
+  for (const [stdCat, keywords] of Object.entries(SYNONYM_MAP)) {
+    if (stdCat === 'Lainnya') continue;
+    for (const kw of keywords) {
+      if (lowerCat.includes(kw)) {
+        return stdCat as CategoryName;
+      }
+    }
+  }
+
+  // 3. If category name doesn't match synonyms directly, test combined category name + rawText through parseExpenseInput
+  const combinedText = `${cleanCat} ${rawText || ''}`.trim();
+  const parsed = parseExpenseInput(combinedText);
+  if (parsed.category !== 'Lainnya') {
+    return parsed.category;
+  }
+
+  return 'Lainnya';
+}
