@@ -156,7 +156,19 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
         setSyncStatusMsg(null);
       }
     } else {
-      const simulatedEmail = prompt('Masukkan alamat email Google / Gmail Anda untuk login cloud:', 'budi@gmail.com');
+      const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      if (!isLocalhost) {
+        showAlert(
+          'error',
+          'Konfigurasi Cloud Belum Aktif',
+          'Sistem mendeteksi Environment Variables (NEXT_PUBLIC_SUPABASE_URL & NEXT_PUBLIC_SUPABASE_ANON_KEY) belum terbaca di Vercel. Pastikan Anda sudah menambahkannya di Vercel Settings > Environment Variables, LALU lakukan Re-deploy pada proyek Anda agar Next.js menyertakan konfigurasi tersebut.'
+        );
+        setIsSyncing(false);
+        setSyncStatusMsg(null);
+        return;
+      }
+
+      const simulatedEmail = prompt('Masukkan alamat email Google / Gmail Anda untuk login cloud (Mode Simulasi Lokal):', 'budi@gmail.com');
       if (simulatedEmail && simulatedEmail.includes('@')) {
         const txs = getStoredTransactions();
         const { mergedTransactions, addedCount } = await autoMergeLocalTransactions(txs, simulatedEmail.trim());

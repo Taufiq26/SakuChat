@@ -81,14 +81,24 @@ class AIClassifierSingleton {
         }
       });
 
-      this.progress = 95;
+      this.progress = 92;
       this.notify();
 
-      // Pre-compute embeddings for all anchor categories
-      for (const [cat, text] of Object.entries(CATEGORY_ANCHORS)) {
+      // Yield to main UI thread so rendering/animations don't freeze after download completes
+      await new Promise((resolve) => setTimeout(resolve, 80));
+
+      // Pre-compute embeddings for all anchor categories with yielding
+      const entries = Object.entries(CATEGORY_ANCHORS);
+      let step = 0;
+      for (const [cat, text] of entries) {
         if (cat === 'Lainnya') continue;
         const out = await this.pipe(text, { pooling: 'mean', normalize: true });
         this.anchorEmbeddings[cat] = Array.from(out.data);
+        step++;
+        this.progress = 92 + Math.round((step / entries.length) * 7);
+        this.notify();
+        // Yield 20ms to allow UI animation frames to render smoothly
+        await new Promise((resolve) => setTimeout(resolve, 20));
       }
 
       this.status = 'ready';
