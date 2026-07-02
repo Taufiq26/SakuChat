@@ -69,38 +69,40 @@ export default function Navbar({ onOpenSettings }: NavbarProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* On-Device WebAI Status Badge */}
-        {aiStatus === 'loading' && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-indigo-50 text-indigo-600 border border-indigo-200 shadow-xs"
-            title="Mengunduh/Memuat Model AI Mini (~23 MB) ke Cache Browser"
-          >
-            <Sparkles className="w-3 h-3 animate-spin text-indigo-600" />
-            <span>AI ({aiProgress}%)</span>
-          </div>
-        )}
-        {aiStatus === 'ready' && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-violet-50 text-violet-600 border border-violet-200 shadow-xs"
-            title="On-Device WebAI Siap (100% Offline & Privat)"
-          >
-            <Sparkles className="w-3 h-3 text-violet-500" />
-            <span>AI Ready</span>
-          </div>
-        )}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-1.5">
+          {/* On-Device WebAI Status Badge */}
+          {aiStatus === 'loading' && (
+            <div
+              className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold bg-indigo-50 text-indigo-600 border border-indigo-200 shadow-xs whitespace-nowrap"
+              title="Mengunduh/Memuat Model AI Mini (~23 MB) ke Cache Browser"
+            >
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 animate-spin text-indigo-600 shrink-0" />
+              <span>AI ({aiProgress}%)</span>
+            </div>
+          )}
+          {aiStatus === 'ready' && (
+            <div
+              className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold bg-violet-50 text-violet-600 border border-violet-200 shadow-xs whitespace-nowrap"
+              title="On-Device WebAI Siap (100% Offline & Privat)"
+            >
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-violet-500 shrink-0" />
+              <span>AI Ready</span>
+            </div>
+          )}
 
-        {/* Connection status badge */}
-        <div
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${
-            isOnline
-              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/80'
-              : 'bg-rose-50 text-rose-600 border border-rose-200/80'
-          }`}
-          title={isOnline ? 'Online - Siap sinkronisasi cloud' : 'Offline - Data aman tersimpan lokal'}
-        >
-          <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-          <span>{isOnline ? 'Online' : 'Offline'}</span>
+          {/* Connection status badge */}
+          <div
+            className={`flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold transition-all shadow-xs whitespace-nowrap ${
+              isOnline
+                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/80'
+                : 'bg-rose-50 text-rose-600 border border-rose-200/80'
+            }`}
+            title={isOnline ? 'Online - Siap sinkronisasi cloud' : 'Offline - Data aman tersimpan lokal'}
+          >
+            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0 ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+            <span>{isOnline ? 'Online' : 'Offline'}</span>
+          </div>
         </div>
 
         {/* User / Sync Profile Button */}

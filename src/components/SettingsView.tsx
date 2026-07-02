@@ -387,11 +387,14 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
 
         <div className="space-y-3 pt-1">
           {/* Transaksi Lokal Banner */}
-          <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs flex items-center justify-between gap-2">
             <div className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
-              <Database className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> Transaksi Tersimpan Lokal
+              <Database className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" /> 
+              <span>Transaksi Tersimpan Lokal</span>
             </div>
-            <div className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-black text-sm">{localCount} Item</div>
+            <div className="px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-black text-xs sm:text-sm text-center shrink-0 whitespace-nowrap flex items-center justify-center">
+              {localCount} Item
+            </div>
           </div>
 
           {/* Ekspor & Impor Side by Side */}
