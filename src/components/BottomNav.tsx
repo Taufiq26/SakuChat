@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { MessageSquarePlus, PieChart, Settings } from 'lucide-react';
+import { MessageSquarePlus, PieChart, BellRing, Settings } from 'lucide-react';
 
-export type TabType = 'chat' | 'reports' | 'settings';
+export type TabType = 'chat' | 'reports' | 'routines' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabType;
@@ -20,8 +20,13 @@ export default function BottomNav({ activeTab, onSelectTab, unreadAlertsCount = 
     },
     {
       id: 'reports' as TabType,
-      label: 'Laporan & Insight',
-      icon: PieChart,
+      label: 'Laporan',
+      icon: PieChart
+    },
+    {
+      id: 'routines' as TabType,
+      label: 'Rutinitas',
+      icon: BellRing,
       badge: unreadAlertsCount > 0 ? unreadAlertsCount : undefined
     },
     {

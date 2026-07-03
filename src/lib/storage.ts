@@ -193,6 +193,7 @@ export function clearAllLocalData(): void {
       localStorage.removeItem(MESSAGES_KEY);
       localStorage.removeItem(LEARNED_KEYWORDS_KEY);
       localStorage.removeItem('sakuchat_cloud_transactions_cache_v1');
+      localStorage.removeItem('sakuchat_dismissed_routines_v1');
     } catch {}
   }
 }

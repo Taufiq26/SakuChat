@@ -6,7 +6,9 @@ import BottomNav, { TabType } from '@/components/BottomNav';
 import ChatView from '@/components/ChatView';
 import ReportsView from '@/components/ReportsView';
 import SettingsView from '@/components/SettingsView';
-import { getStoredTransactions, getAnomalyAlerts } from '@/lib/storage';
+import RoutinesView from '@/components/RoutinesView';
+import { getStoredTransactions } from '@/lib/storage';
+import { detectSmartRoutines } from '@/lib/routineEngine';
 import { supabase, getStoredSession, saveSession, autoMergeLocalTransactions, autoSyncIfOnline } from '@/lib/supabase';
 import InstallPromptModal from '@/components/InstallPromptModal';
 
@@ -95,9 +97,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const txs = getStoredTransactions();
-    const alerts = getAnomalyAlerts(txs);
-    const highMed = alerts.filter((a) => a.severity === 'high' || a.severity === 'medium');
-    setAlertsCount(highMed.length);
+    const routines = detectSmartRoutines(txs);
+    setAlertsCount(routines.length);
   }, [refreshKey, activeTab]);
 
   const handleUpdate = () => {
@@ -112,6 +113,7 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {activeTab === 'chat' && <ChatView onTransactionUpdated={handleUpdate} />}
         {activeTab === 'reports' && <ReportsView key={refreshKey} />}
+        {activeTab === 'routines' && <RoutinesView key={refreshKey} onTransactionUpdated={handleUpdate} />}
         {activeTab === 'settings' && <SettingsView key={refreshKey} onDataReset={handleUpdate} />}
       </main>
 

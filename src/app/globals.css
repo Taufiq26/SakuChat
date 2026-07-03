@@ -253,7 +253,8 @@ body {
 }
 
 /* Bulletproof Automated Dark Overrides for Pastel Boxes */
-.dark [class*="bg-emerald-50"] {
+.dark [class*="bg-emerald-50"],
+.dark [class*="bg-emerald-100"] {
   background-color: rgba(6, 78, 59, 0.45) !important;
   border-color: rgba(16, 185, 129, 0.3) !important;
 }
@@ -263,7 +264,8 @@ body {
   color: #6EE7B7 !important;
 }
 
-.dark [class*="bg-rose-50"] {
+.dark [class*="bg-rose-50"],
+.dark [class*="bg-rose-100"] {
   background-color: rgba(136, 19, 55, 0.45) !important;
   border-color: rgba(244, 63, 94, 0.3) !important;
 }
@@ -273,7 +275,9 @@ body {
   color: #FDA4AF !important;
 }
 
-.dark [class*="bg-amber-50"] {
+.dark [class*="bg-amber-50"],
+.dark [class*="bg-amber-100"],
+.dark [class*="bg-amber-200"] {
   background-color: rgba(120, 53, 15, 0.45) !important;
   border-color: rgba(245, 158, 11, 0.3) !important;
 }
@@ -283,7 +287,8 @@ body {
   color: #FCD34D !important;
 }
 
-.dark [class*="bg-indigo-50"] {
+.dark [class*="bg-indigo-50"],
+.dark [class*="bg-indigo-100"] {
   background-color: rgba(30, 58, 138, 0.45) !important;
   border-color: rgba(99, 102, 241, 0.3) !important;
 }
@@ -293,7 +298,8 @@ body {
   color: #A5B4FC !important;
 }
 
-.dark [class*="bg-sky-50"] {
+.dark [class*="bg-sky-50"],
+.dark [class*="bg-sky-100"] {
   background-color: rgba(12, 74, 110, 0.45) !important;
   border-color: rgba(14, 165, 233, 0.3) !important;
 }

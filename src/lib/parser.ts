@@ -118,6 +118,29 @@ function extractNaturalLanguageDate(text: string): { dateISO?: string; dateLabel
     return { dateISO: d.toISOString(), dateLabel: 'setahun lalu' };
   }
 
+  // 3.5. Day names (hari senin, selasa kemarin, rabu lalu, etc.)
+  const dayNamesMap: Record<string, number> = {
+    'ahad': 0, 'minggu': 0, 'senin': 1, 'selasa': 2, 'rabu': 3, 'kamis': 4, 'jumat': 5, "jum'at": 5, 'sabtu': 6
+  };
+  const dayMatch = text.match(/\b(?:hari\s+)?(ahad|minggu|senin|selasa|rabu|kamis|jumat|jum'at|sabtu)\b(?:\s+(lalu|kemarin|kmrn|llu|silam))?/i);
+  if (dayMatch) {
+    const dayNameRaw = dayMatch[1].toLowerCase();
+    const targetDay = dayNamesMap[dayNameRaw];
+    if (targetDay !== undefined) {
+      const currentDay = now.getDay();
+      let daysAgo = (currentDay - targetDay + 7) % 7;
+      if (daysAgo === 0 && dayMatch[2]) {
+        daysAgo = 7; // e.g. today is Monday and user explicitly said "senin lalu"
+      }
+      const d = new Date(now.getTime() - daysAgo * 86400000);
+      const dayLabelsMap: Record<string, string> = {
+        'ahad': 'Minggu', 'minggu': 'Minggu', 'senin': 'Senin', 'selasa': 'Selasa', 'rabu': 'Rabu', 'kamis': 'Kamis', 'jumat': 'Jumat', "jum'at": 'Jumat', 'sabtu': 'Sabtu'
+      };
+      const label = daysAgo === 0 ? `Hari ${dayLabelsMap[dayNameRaw]}` : `Hari ${dayLabelsMap[dayNameRaw]} lalu`;
+      return { dateISO: d.toISOString(), dateLabel: label };
+    }
+  }
+
   // 4. Specific dates: DD Month YYYY (e.g. "20 April 2025" or "20 apr 25")
   const monthNamesMap: Record<string, number> = {
     'januari': 0, 'jan': 0, 'februari': 1, 'feb': 1, 'maret': 2, 'mar': 2,

@@ -45,3 +45,16 @@ export interface AnomalyAlert {
   severity: 'high' | 'medium' | 'info';
   category?: string;
 }
+
+export interface RoutineReminder {
+  id: string;
+  type: 'periodic' | 'anomaly';
+  title: string;
+  description: string;
+  suggestedAmount: number;
+  category: CategoryName;
+  frequencyLabel: string;
+  lastOccurredDate: string;
+  nextDueDate?: string;
+  isDismissedUntil?: string;
+}
