@@ -31,7 +31,7 @@ export default function BottomNav({ activeTab, onSelectTab, unreadAlertsCount = 
     },
     {
       id: 'settings' as TabType,
-      label: 'Akun & Sync',
+      label: 'Pengaturan',
       icon: Settings
     }
   ];
@@ -45,11 +45,10 @@ export default function BottomNav({ activeTab, onSelectTab, unreadAlertsCount = 
           <button
             key={item.id}
             onClick={() => onSelectTab(item.id)}
-            className={`flex flex-col items-center justify-center py-2 px-5 rounded-2xl transition-all relative ${
-              isActive
+            className={`flex flex-col items-center justify-center py-2 px-5 rounded-2xl transition-all relative ${isActive
                 ? 'text-indigo-600 font-bold bg-indigo-50/90 border border-indigo-200/80 shadow-sm scale-105'
                 : 'text-slate-400 hover:text-slate-700 font-semibold'
-            }`}
+              }`}
           >
             <div className="relative">
               <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : ''}`} />

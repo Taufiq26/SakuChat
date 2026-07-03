@@ -169,8 +169,8 @@ export default function ReportsView() {
         <button
           onClick={() => setActiveTab('summary')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'summary'
-              ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200 dark:border-slate-700/80'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
+            ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200 dark:border-slate-700/80'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
             }`}
         >
           <PieIcon className="w-4 h-4" /> Ringkasan & Anomali
@@ -178,8 +178,8 @@ export default function ReportsView() {
         <button
           onClick={() => setActiveTab('annual')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === 'annual'
-              ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200 dark:border-slate-700/80'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
+            ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-md border border-slate-200 dark:border-slate-700/80'
+            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-bold'
             }`}
         >
           <BarChart2 className="w-4 h-4" /> Analisa & Tren Bulanan (Setahun)
@@ -199,8 +199,8 @@ export default function ReportsView() {
                 key={item.id}
                 onClick={() => setFilter(item.id as 'all' | '7days' | 'month')}
                 className={`flex-1 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${filter === item.id
-                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-bold'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-bold'
                   }`}
               >
                 {item.label}
@@ -223,7 +223,7 @@ export default function ReportsView() {
           <div className="glass-panel p-5 space-y-5">
             <div className="flex items-center gap-2 font-extrabold text-sm text-slate-800">
               <PieIcon className="w-4 h-4 text-indigo-500" />
-              <span>Distribusi Pengeluaran (Sleek Ring Chart)</span>
+              <span>Distribusi Pengeluaran</span>
             </div>
 
             {dist.length === 0 ? (
@@ -333,18 +333,18 @@ export default function ReportsView() {
                 <div
                   key={alert.id}
                   className={`glass-panel p-5 sm:p-6 border-l-4 transition-all shadow-md ${alert.severity === 'high'
-                      ? 'border-l-rose-500 border-rose-200/80 dark:border-rose-900/80 bg-rose-50/80 dark:bg-rose-950/40'
-                      : alert.severity === 'medium'
-                        ? 'border-l-amber-500 border-amber-200/80 dark:border-amber-900/80 bg-amber-50/80 dark:bg-amber-950/40'
-                        : 'border-l-emerald-500 border-emerald-200/80 dark:border-emerald-900/80 bg-emerald-50/80 dark:bg-emerald-950/40'
+                    ? 'border-l-rose-500 border-rose-200/80 dark:border-rose-900/80 bg-rose-50/80 dark:bg-rose-950/40'
+                    : alert.severity === 'medium'
+                      ? 'border-l-amber-500 border-amber-200/80 dark:border-amber-900/80 bg-amber-50/80 dark:bg-amber-950/40'
+                      : 'border-l-emerald-500 border-emerald-200/80 dark:border-emerald-900/80 bg-emerald-50/80 dark:bg-emerald-950/40'
                     }`}
                 >
                   <div className="flex items-start gap-3.5">
                     <div className={`p-3 rounded-2xl shrink-0 shadow-xs ${alert.severity === 'high'
-                        ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400'
-                        : alert.severity === 'medium'
-                          ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400'
-                          : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400'
+                      ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400'
+                      : alert.severity === 'medium'
+                        ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400'
+                        : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400'
                       }`}>
                       <AlertTriangle className="w-6 h-6" />
                     </div>
@@ -432,8 +432,8 @@ export default function ReportsView() {
                     key={yr}
                     onClick={() => setSelectedYear(yr)}
                     className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${selectedYear === yr
-                        ? 'bg-indigo-600 text-white shadow-md'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                   >
                     {yr}
@@ -452,8 +452,8 @@ export default function ReportsView() {
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${selectedCategory === cat
-                          ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-md'
-                          : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'bg-slate-800 dark:bg-indigo-600 text-white shadow-md'
+                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                     >
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: catColor }} />
@@ -620,8 +620,8 @@ export default function ReportsView() {
                         .filter((t) => {
                           const d = new Date(t.date);
                           return d.getFullYear() === selectedYear &&
-                                 d.getMonth() === m.monthIndex &&
-                                 (selectedCategory === 'SEMUA' || t.category === selectedCategory);
+                            d.getMonth() === m.monthIndex &&
+                            (selectedCategory === 'SEMUA' || t.category === selectedCategory);
                         })
                         .sort((a, b) => b.amount - a.amount);
 

@@ -101,7 +101,7 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
       const storedSess = getStoredSession();
       if (supabase) {
         if (!storedSess.isLoggedIn) {
-          supabase.auth.signOut().catch(() => {});
+          supabase.auth.signOut().catch(() => { });
         } else {
           supabase.auth.getSession().then(({ data: { session: sbSession } }) => {
             if (sbSession && sbSession.user && sbSession.user.email) {
@@ -399,7 +399,7 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
           <span>Privasi & Penyimpanan Lokal</span>
         </div>
         <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
-          Secara standar, seluruh transaksi dan percakapanmu disimpan 100% secara privat di peramban pengguna melalui penyimpanan lokal (<span className="font-mono text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 px-1.5 py-0.5 rounded text-[11px] font-bold">localStorage</span>). Aplikasi berfungsi penuh tanpa koneksi internet.
+          Secara standar, seluruh transaksi dan percakapanmu disimpan 100% secara privat di peramban pengguna melalui penyimpanan lokal. Aplikasi berfungsi penuh tanpa koneksi internet.
         </p>
 
         <input
@@ -414,7 +414,7 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
           {/* Transaksi Lokal Banner */}
           <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-xs flex items-center justify-between gap-2">
             <div className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
-              <Database className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" /> 
+              <Database className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
               <span>Transaksi Tersimpan Lokal</span>
             </div>
             <div className="px-3.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-black text-xs sm:text-sm text-center shrink-0 whitespace-nowrap flex items-center justify-center">
@@ -466,11 +466,10 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
           <button
             type="button"
             onClick={() => handleThemeChange('light')}
-            className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
-              theme === 'light'
+            className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${theme === 'light'
                 ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-500 text-amber-800 dark:text-amber-300 shadow-sm font-black'
                 : 'bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-amber-200 font-bold'
-            }`}
+              }`}
           >
             <Sun className={`w-5 h-5 ${theme === 'light' ? 'text-amber-500' : 'text-slate-400'}`} />
             <span className="text-xs">Tema Terang</span>
@@ -479,11 +478,10 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
           <button
             type="button"
             onClick={() => handleThemeChange('dark')}
-            className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
-              theme === 'dark'
+            className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${theme === 'dark'
                 ? 'bg-indigo-900/40 border-indigo-500 text-indigo-300 shadow-sm font-black ring-1 ring-indigo-500/50'
                 : 'bg-slate-50/80 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-300 font-bold'
-            }`}
+              }`}
           >
             <Moon className={`w-5 h-5 ${theme === 'dark' ? 'text-indigo-400' : 'text-slate-400'}`} />
             <span className="text-xs">Tema Gelap</span>

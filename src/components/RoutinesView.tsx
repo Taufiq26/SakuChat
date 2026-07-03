@@ -89,8 +89,8 @@ export default function RoutinesView({ onTransactionUpdated }: RoutinesViewProps
       {/* Anomaly Alerts Section */}
       {anomalyReminders.length > 0 && (
         <div className="mb-8">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
-            <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-3 px-1">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
               <h2 className="text-sm sm:text-base font-extrabold text-slate-800 tracking-tight truncate">
                 Lonjakan & Anomali
@@ -114,11 +114,11 @@ export default function RoutinesView({ onTransactionUpdated }: RoutinesViewProps
                       <AlertTriangle className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1">
+                        <h3 className="text-sm font-black text-slate-900 tracking-tight leading-snug">
                           {alert.title}
                         </h3>
-                        <span className="bg-amber-200/60 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        <span className="self-start sm:self-auto bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 shadow-2xs">
                           {alert.frequencyLabel}
                         </span>
                       </div>
@@ -145,8 +145,8 @@ export default function RoutinesView({ onTransactionUpdated }: RoutinesViewProps
 
       {/* Periodic Routines Section */}
       <div className="mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-1">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center justify-between gap-2 mb-3 px-1">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <CalendarClock className="w-5 h-5 text-indigo-600 shrink-0" />
             <h2 className="text-sm sm:text-base font-extrabold text-slate-800 tracking-tight truncate">
               Rutinitas Berkala
@@ -165,16 +165,12 @@ export default function RoutinesView({ onTransactionUpdated }: RoutinesViewProps
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
+            <h3 className="text-base sm:text-lg font-black text-slate-800">
               Semua Rutinitas Terkendali!
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
-              Belum ada rutinitas yang jatuh tempo hari ini ataupun anomali lonjakan pengeluaran boros yang terdeteksi AI.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-sm mx-auto leading-relaxed">
+              Belum ada rutinitas jatuh tempo atau anomali pengeluaran terdeteksi saat ini.
             </p>
-            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold">
-              <Sparkles className="w-4 h-4 text-indigo-500" />
-              <span>AI terus memindai riwayat pengeluaranmu secara otomatis</span>
-            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3.5">
@@ -190,11 +186,11 @@ export default function RoutinesView({ onTransactionUpdated }: RoutinesViewProps
                       <Clock className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1">
+                        <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight leading-snug">
                           {routine.title}
                         </h3>
-                        <span className="bg-indigo-50 text-indigo-700 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-indigo-100">
+                        <span className="self-start sm:self-auto bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 shadow-2xs">
                           {routine.frequencyLabel}
                         </span>
                       </div>
