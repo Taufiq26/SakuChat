@@ -14,6 +14,7 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   transactionId?: string; // Links to a created transaction
+  transactionIds?: string[]; // Links to multiple batch created transactions
   needsAmountForText?: string; // For EC-1: text waiting for amount input
   suggestedCategory?: string;
 }

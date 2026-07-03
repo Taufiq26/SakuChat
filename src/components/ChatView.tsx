@@ -61,8 +61,9 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
     if (!customText) setInputText('');
 
     try {
+      const uniqueSuffix = Math.random().toString(36).substring(2, 7);
       const userMsg: ChatMessage = {
-        id: `msg-${Date.now()}-u`,
+        id: `msg-${Date.now()}-${uniqueSuffix}-u`,
         sender: 'user',
         text: raw,
         timestamp: new Date().toISOString()
@@ -82,8 +83,9 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
 
           if (!isNaN(parsedAmount) && parsedAmount > 0) {
             const txDate = pendingTextForAmount.dateISO || new Date().toISOString();
+            const txSuffix = Math.random().toString(36).substring(2, 7);
             const newTx: Transaction = {
-              id: `tx-${Date.now()}`,
+              id: `tx-${Date.now()}-${txSuffix}`,
               rawText: pendingTextForAmount.text,
               amount: parsedAmount,
               category: pendingTextForAmount.category,
@@ -94,7 +96,7 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
             onTransactionUpdated();
 
             const assistantReply: ChatMessage = {
-              id: `msg-${Date.now()}-a`,
+              id: `msg-${Date.now()}-${txSuffix}-a`,
               sender: 'assistant',
               text: pendingTextForAmount.dateLabel ? `🗓️ Dicatat untuk tanggal ${pendingTextForAmount.dateLabel}` : ``,
               timestamp: new Date().toISOString(),
@@ -107,8 +109,9 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
           }
         }
 
+        const errSuffix = Math.random().toString(36).substring(2, 7);
         const errorReply: ChatMessage = {
-          id: `msg-${Date.now()}-a`,
+          id: `msg-${Date.now()}-${errSuffix}-a`,
           sender: 'assistant',
           text: `Maaf, nominal angka belum terdeteksi. Berapa nominal pengeluaran untuk "${pendingTextForAmount.text}"? (Contoh: 50000 atau 50rb)`,
           timestamp: new Date().toISOString()
@@ -118,12 +121,92 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
         return;
       }
 
+      // Check for multi-line inputs separated by newlines
+      const lines = raw
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+      if (lines.length > 1) {
+        const createdTxs: Transaction[] = [];
+        const pendingLines: { text: string; category: CategoryName; dateISO?: string; dateLabel?: string }[] = [];
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const parsed = await parseExpenseInputAsync(line);
+          if (parsed.amount && parsed.amount > 0) {
+            const txDate = parsed.dateISO || new Date().toISOString();
+            const txSuffix = Math.random().toString(36).substring(2, 7);
+            const newTx: Transaction = {
+              id: `tx-${Date.now()}-${txSuffix}-${i}`,
+              rawText: line,
+              amount: parsed.amount,
+              category: parsed.category,
+              date: txDate,
+              isSynced: false
+            };
+            saveTransaction(newTx);
+            createdTxs.push(newTx);
+          } else {
+            pendingLines.push({ text: line, category: parsed.category, dateISO: parsed.dateISO, dateLabel: parsed.dateLabel });
+          }
+        }
+
+        if (createdTxs.length > 0) {
+          onTransactionUpdated();
+        }
+
+        const createdIds = createdTxs.map((t) => t.id);
+        let replyText = '';
+        if (createdTxs.length > 1) {
+          replyText = `🗓️ ${createdTxs.length} transaksi berhasil dicatat sekaligus!`;
+        } else if (createdTxs.length === 1) {
+          const firstTxDateLabel = lines[0] ? (await parseExpenseInputAsync(lines[0])).dateLabel : undefined;
+          replyText = firstTxDateLabel ? `🗓️ Dicatat untuk tanggal ${firstTxDateLabel}` : '';
+        }
+
+        if (pendingLines.length > 0) {
+          if (createdTxs.length === 0 && pendingLines.length === 1) {
+            setPendingTextForAmount(pendingLines[0]);
+            const ec1Suffix = Math.random().toString(36).substring(2, 7);
+            const ec1Reply: ChatMessage = {
+              id: `msg-${Date.now()}-${ec1Suffix}-a`,
+              sender: 'assistant',
+              text: `Catatan diterima! Kategori terdeteksi: ${pendingLines[0].category}${pendingLines[0].dateLabel ? ` (${pendingLines[0].dateLabel})` : ''}.\n\nBerapa nominal pengeluaran untuk transaksi ini? (Ketik angkanya saja, contoh: 35rb atau 35000)`,
+              timestamp: new Date().toISOString()
+            };
+            saveMessage(ec1Reply);
+            setMessages((prev) => [...prev, ec1Reply]);
+            setIsTyping(false);
+            return;
+          } else {
+            const unrecordedText = pendingLines.map((p) => `"${p.text}"`).join(', ');
+            replyText += (replyText ? '\n\n' : '') + `⚠️ Catatan berikut belum mencantumkan nominal angka dan dilewati: ${unrecordedText}`;
+          }
+        }
+
+        const batchSuffix = Math.random().toString(36).substring(2, 7);
+        const assistantReply: ChatMessage = {
+          id: `msg-${Date.now()}-${batchSuffix}-a`,
+          sender: 'assistant',
+          text: replyText,
+          timestamp: new Date().toISOString(),
+          transactionIds: createdIds.length > 0 ? createdIds : undefined,
+          transactionId: createdIds.length > 0 ? createdIds[0] : undefined
+        };
+        saveMessage(assistantReply);
+        setMessages((prev) => [...prev, assistantReply]);
+        setIsTyping(false);
+        return;
+      }
+
       const parsed = await parseExpenseInputAsync(raw);
 
       if (parsed.amount && parsed.amount > 0) {
         const txDate = parsed.dateISO || new Date().toISOString();
+        const txSuffix = Math.random().toString(36).substring(2, 7);
         const newTx: Transaction = {
-          id: `tx-${Date.now()}`,
+          id: `tx-${Date.now()}-${txSuffix}`,
           rawText: raw,
           amount: parsed.amount,
           category: parsed.category,
@@ -134,7 +217,7 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
         onTransactionUpdated();
 
         const assistantReply: ChatMessage = {
-          id: `msg-${Date.now()}-a`,
+          id: `msg-${Date.now()}-${txSuffix}-a`,
           sender: 'assistant',
           text: parsed.dateLabel ? `🗓️ Dicatat untuk tanggal ${parsed.dateLabel}` : ``,
           timestamp: new Date().toISOString(),
@@ -144,8 +227,9 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
         setMessages((prev) => [...prev, assistantReply]);
       } else {
         setPendingTextForAmount({ text: raw, category: parsed.category, dateISO: parsed.dateISO, dateLabel: parsed.dateLabel });
+        const ec1Suffix = Math.random().toString(36).substring(2, 7);
         const ec1Reply: ChatMessage = {
-          id: `msg-${Date.now()}-a`,
+          id: `msg-${Date.now()}-${ec1Suffix}-a`,
           sender: 'assistant',
           text: `Catatan diterima! Kategori terdeteksi: ${parsed.category}${parsed.dateLabel ? ` (${parsed.dateLabel})` : ''}.\n\nBerapa nominal pengeluaran untuk transaksi ini? (Ketik angkanya saja, contoh: 35rb atau 35000)`,
           timestamp: new Date().toISOString()
@@ -170,11 +254,21 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
   const handleDeleteTx = async (txId: string) => {
     deleteTransaction(txId);
     setMessages((prev) =>
-      prev.map((m) =>
-        m.transactionId === txId
-          ? { ...m, text: 'Transaksi ini telah dihapus.', transactionId: undefined }
-          : m
-      )
+      prev.map((m) => {
+        if (m.transactionIds && m.transactionIds.includes(txId)) {
+          const remainingIds = m.transactionIds.filter((id) => id !== txId);
+          return {
+            ...m,
+            transactionIds: remainingIds.length > 0 ? remainingIds : undefined,
+            transactionId: remainingIds.length > 0 ? remainingIds[0] : undefined,
+            text: remainingIds.length > 0 ? m.text : 'Semua transaksi dalam pesan ini telah dihapus.'
+          };
+        }
+        if (m.transactionId === txId) {
+          return { ...m, text: 'Transaksi ini telah dihapus.', transactionId: undefined };
+        }
+        return m;
+      })
     );
     await deleteCloudTransaction(txId);
     onTransactionUpdated();
@@ -243,7 +337,11 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
           const isLast = idx === messages.length - 1;
           const isUser = msg.sender === 'user';
           const storedTxs = getStoredTransactions();
-          const tx = msg.transactionId ? storedTxs.find((t) => t.id === msg.transactionId) : null;
+          const txList = msg.transactionIds
+            ? storedTxs.filter((t) => msg.transactionIds!.includes(t.id))
+            : msg.transactionId
+              ? storedTxs.filter((t) => t.id === msg.transactionId)
+              : [];
           const cleanTextStr = formatCleanText(msg.text);
 
           return (
@@ -258,57 +356,68 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
                   </div>
                 )}
 
-                {/* Rich Embedded Transaction Card Only (FR-2) */}
-                {tx && (
-                  <div className={`${cleanTextStr ? 'mt-3' : ''} p-4 rounded-2xl bg-slate-50/95 border border-slate-200/80 shadow-xs animate-pop-in w-full space-y-3`}>
-                    {/* Top Row: Tag Icon + Amount + Delete Button */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div
-                          className="w-9 h-9 rounded-xl flex shrink-0 items-center justify-center font-bold text-xs text-white shadow-xs"
-                          style={{ backgroundColor: CATEGORY_COLORS[tx.category] || '#818CF8' }}
-                        >
-                          <Tag className="w-4.5 h-4.5" />
+                {/* Rich Embedded Transaction Cards (FR-2 & Batch Logging) */}
+                {txList.length > 0 && (
+                  <div className={`space-y-3 ${cleanTextStr ? 'mt-3' : ''} w-full`}>
+                    {txList.map((tx) => (
+                      <div key={tx.id} className="p-4 rounded-2xl bg-slate-50/95 border border-slate-200/80 shadow-xs animate-pop-in w-full space-y-3">
+                        {/* Top Row: Tag Icon + Amount + Delete Button */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className="w-9 h-9 rounded-xl flex shrink-0 items-center justify-center font-bold text-xs text-white shadow-xs"
+                              style={{ backgroundColor: CATEGORY_COLORS[tx.category] || '#818CF8' }}
+                            >
+                              <Tag className="w-4.5 h-4.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-black text-lg text-emerald-600 tracking-tight leading-tight">
+                                Rp {tx.amount.toLocaleString('id-ID')}
+                              </div>
+                              {txList.length > 1 && (
+                                <div className="text-xs font-semibold text-slate-600 mt-0.5 truncate max-w-[180px] sm:max-w-[240px]" title={tx.rawText}>
+                                  {tx.rawText}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => handleDeleteTx(tx.id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all shrink-0 cursor-pointer self-start"
+                            title="Hapus transaksi ini"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
-                        <div className="font-black text-lg text-emerald-600 tracking-tight">
-                          Rp {tx.amount.toLocaleString('id-ID')}
+
+                        {/* Bottom Row: Full Category Badge + Date Badge */}
+                        <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                          <button
+                            onClick={() => setActiveModalTxId(tx.id)}
+                            className="flex items-center gap-1.5 bg-white hover:bg-indigo-50/90 text-slate-700 hover:text-indigo-700 font-extrabold text-xs py-1.5 px-3 rounded-xl border border-slate-200/90 hover:border-indigo-300 shadow-2xs transition-all cursor-pointer group text-left"
+                            title="Klik untuk mengganti kategori"
+                          >
+                            <span
+                              className="inline-block w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs group-hover:scale-110 transition-transform"
+                              style={{ backgroundColor: CATEGORY_COLORS[tx.category] || '#818CF8' }}
+                            />
+                            <span>{tx.category}</span>
+                          </button>
+
+                          <button
+                            onClick={() => setActiveDateModalTxId(tx.id)}
+                            className="flex items-center gap-1.5 bg-white hover:bg-indigo-50/90 text-slate-600 hover:text-indigo-700 font-extrabold text-xs py-1.5 px-3 rounded-xl border border-slate-200/90 hover:border-indigo-300 shadow-2xs transition-all cursor-pointer shrink-0"
+                            title="Klik untuk mengubah tanggal transaksi"
+                          >
+                            <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                            <span>
+                              {new Date(tx.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                            </span>
+                          </button>
                         </div>
                       </div>
-
-                      <button
-                        onClick={() => handleDeleteTx(tx.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all shrink-0 cursor-pointer"
-                        title="Hapus transaksi ini"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Bottom Row: Full Category Badge + Date Badge */}
-                    <div className="flex items-center gap-2 flex-wrap pt-0.5">
-                      <button
-                        onClick={() => setActiveModalTxId(tx.id)}
-                        className="flex items-center gap-1.5 bg-white hover:bg-indigo-50/90 text-slate-700 hover:text-indigo-700 font-extrabold text-xs py-1.5 px-3 rounded-xl border border-slate-200/90 hover:border-indigo-300 shadow-2xs transition-all cursor-pointer group text-left"
-                        title="Klik untuk mengganti kategori"
-                      >
-                        <span
-                          className="inline-block w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs group-hover:scale-110 transition-transform"
-                          style={{ backgroundColor: CATEGORY_COLORS[tx.category] || '#818CF8' }}
-                        />
-                        <span>{tx.category}</span>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveDateModalTxId(tx.id)}
-                        className="flex items-center gap-1.5 bg-white hover:bg-indigo-50/90 text-slate-600 hover:text-indigo-700 font-extrabold text-xs py-1.5 px-3 rounded-xl border border-slate-200/90 hover:border-indigo-300 shadow-2xs transition-all cursor-pointer shrink-0"
-                        title="Klik untuk mengubah tanggal transaksi"
-                      >
-                        <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                        <span>
-                          {new Date(tx.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                        </span>
-                      </button>
-                    </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -331,19 +440,24 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
 
       {/* Floating Input Area */}
       <div className="px-4 pb-3 pt-1 bg-transparent z-10">
-        <div className="floating-input-bar flex items-center gap-2 px-1.5 py-1.5">
-          <input
-            type="text"
+        <div className="floating-input-bar flex items-end gap-2 px-2 py-1.5">
+          <textarea
+            rows={1}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={pendingTextForAmount ? 'Ketik nominal angka (misal: 50000)...' : 'Ketik pengeluaran (misal: Makan 20rb)...'}
-            className="flex-1 bg-transparent border-none px-3.5 py-2 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder={pendingTextForAmount ? 'Nominal angka (misal: 50000)...' : 'Ketik pengeluaran...'}
+            className="flex-1 bg-transparent border-none px-3 py-2 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none resize-none max-h-28 overflow-y-auto leading-relaxed"
           />
           <button
             onClick={() => handleSend()}
             disabled={!inputText.trim()}
-            className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-500 hover:from-sky-500 hover:to-indigo-600 disabled:opacity-40 disabled:hover:from-sky-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 transition-all shrink-0"
+            className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-500 hover:from-sky-500 hover:to-indigo-600 disabled:opacity-40 disabled:hover:from-sky-400 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 transition-all shrink-0 mb-0.5"
           >
             <Send className="w-4 h-4" />
           </button>
