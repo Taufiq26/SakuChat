@@ -215,12 +215,34 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
     setSyncStatusMsg('Akun telah keluar. Aplikasi kembali ke mode 100% lokal.');
   };
 
-  const handleClearData = () => {
+  const handleClearLocalOnly = () => {
     showAlert(
       'confirm',
-      'Hapus Data Permanen?',
-      'Apakah kamu yakin ingin menghapus semua data pengeluaran dan riwayat obrolan secara permanen baik di perangkat ini maupun di cloud sinkronisasi?',
-      'Ya, Hapus Semua',
+      'Hapus Data Lokal Saja?',
+      session.isLoggedIn
+        ? 'Apakah kamu yakin ingin mengosongkan riwayat transaksi di perangkat ini? Akun cloud akan otomatis keluar (logout) agar data cloud Anda tetap aman dan tidak tertarik kembali ke perangkat ini.'
+        : 'Apakah kamu yakin ingin mengosongkan seluruh riwayat obrolan dan transaksi di perangkat ini?',
+      'Ya, Hapus Lokal',
+      async () => {
+        if (session.isLoggedIn) {
+          await logoutSession();
+        }
+        clearAllLocalData();
+        setLocalCount(0);
+        setSession({ email: '', isLoggedIn: false, syncedCount: 0 });
+        setSyncStatusMsg('Data lokal berhasil dikosongkan.');
+        closeModal();
+        onDataReset();
+      }
+    );
+  };
+
+  const handleClearAllCloudAndLocal = () => {
+    showAlert(
+      'confirm',
+      'Hapus Permanen Lokal & Cloud?',
+      'PERINGATAN: Apakah kamu yakin ingin menghapus bersih seluruh data pengeluaran dan riwayat obrolan secara permanen, baik di perangkat ini MAUPUN di server cloud Supabase? Data yang dihapus dari cloud tidak dapat dikembalikan.',
+      'Ya, Hapus Semua Permanen',
       async () => {
         clearAllLocalData();
         setLocalCount(0);
@@ -499,14 +521,28 @@ export default function SettingsView({ onDataReset }: SettingsViewProps) {
           <span>Zona Bahaya</span>
         </div>
         <p className="text-xs font-semibold text-rose-800 dark:text-rose-300 leading-relaxed">
-          Menghapus data akan mengosongkan seluruh riwayat obrolan dan pencatatan transaksi di perangkat ini secara permanen.
+          {session.isLoggedIn
+            ? 'Anda terhubung ke Cloud. Pilih untuk menghapus hanya data di perangkat ini (lokal) atau sekaligus menghapus data permanen di server cloud.'
+            : 'Menghapus data akan mengosongkan seluruh riwayat obrolan dan pencatatan transaksi di perangkat ini secara permanen.'}
         </p>
-        <button
-          onClick={handleClearData}
-          className="w-full py-3 rounded-xl bg-white dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 font-extrabold text-xs transition-all shadow-xs cursor-pointer"
-        >
-          Hapus Semua Data Lokal (Reset)
-        </button>
+        <div className="space-y-2.5 pt-1">
+          <button
+            onClick={handleClearLocalOnly}
+            className="w-full py-3 px-4 rounded-xl bg-white dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 font-extrabold text-xs transition-all shadow-xs cursor-pointer active:scale-[0.99]"
+          >
+            Hapus Data Lokal Saja (Reset Perangkat Ini)
+          </button>
+
+          {session.isLoggedIn && (
+            <button
+              onClick={handleClearAllCloudAndLocal}
+              className="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs transition-all shadow-sm hover:shadow cursor-pointer active:scale-[0.99] flex items-center justify-center gap-1.5"
+            >
+              <AlertCircle className="w-3.5 h-3.5" />
+              <span>Hapus Permanen Data Lokal & Cloud</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <AlertModal
