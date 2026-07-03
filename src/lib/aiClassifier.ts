@@ -72,17 +72,24 @@ class AIClassifierSingleton {
         dtype: 'fp32',
         progress_callback: (data: any) => {
           if (data.status === 'progress' && data.progress !== undefined) {
-            this.progress = Math.round(data.progress);
-            this.notify();
+            const mapped = 5 + Math.round((Math.min(100, data.progress) / 100) * 75);
+            if (mapped > this.progress) {
+              this.progress = mapped;
+              this.notify();
+            }
           } else if (data.status === 'ready') {
-            this.progress = 90;
-            this.notify();
+            if (80 > this.progress) {
+              this.progress = 80;
+              this.notify();
+            }
           }
         }
       });
 
-      this.progress = 92;
-      this.notify();
+      if (82 > this.progress) {
+        this.progress = 82;
+        this.notify();
+      }
 
       // Yield to main UI thread so rendering/animations don't freeze after download completes
       await new Promise((resolve) => setTimeout(resolve, 80));
@@ -95,8 +102,11 @@ class AIClassifierSingleton {
         const out = await this.pipe(text, { pooling: 'mean', normalize: true });
         this.anchorEmbeddings[cat] = Array.from(out.data);
         step++;
-        this.progress = 92 + Math.round((step / entries.length) * 7);
-        this.notify();
+        const mappedStep = 82 + Math.round((step / entries.length) * 17);
+        if (mappedStep > this.progress) {
+          this.progress = mappedStep;
+          this.notify();
+        }
         // Yield 20ms to allow UI animation frames to render smoothly
         await new Promise((resolve) => setTimeout(resolve, 20));
       }
