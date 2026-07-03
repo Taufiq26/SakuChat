@@ -60,102 +60,111 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
 
     if (!customText) setInputText('');
 
-    const userMsg: ChatMessage = {
-      id: `msg-${Date.now()}-u`,
-      sender: 'user',
-      text: raw,
-      timestamp: new Date().toISOString()
-    };
-    saveMessage(userMsg);
-    setMessages((prev) => [...prev, userMsg]);
+    try {
+      const userMsg: ChatMessage = {
+        id: `msg-${Date.now()}-u`,
+        sender: 'user',
+        text: raw,
+        timestamp: new Date().toISOString()
+      };
+      saveMessage(userMsg);
+      setMessages((prev) => [...prev, userMsg]);
 
-    setIsTyping(true);
-    await new Promise((resolve) => setTimeout(resolve, 300));
+      setIsTyping(true);
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-    if (pendingTextForAmount) {
-      const numMatch = raw.match(/\d+[\.,]?\d*/);
-      if (numMatch) {
-        let cleanNumStr = numMatch[0].replace(/\./g, '').replace(/,/g, '');
-        if (/rb|ribu|k/i.test(raw)) cleanNumStr += '000';
-        const parsedAmount = parseInt(cleanNumStr, 10);
+      if (pendingTextForAmount) {
+        const numMatch = raw.match(/\d+[\.,]?\d*/);
+        if (numMatch) {
+          let cleanNumStr = numMatch[0].replace(/\./g, '').replace(/,/g, '');
+          if (/rb|ribu|k/i.test(raw)) cleanNumStr += '000';
+          const parsedAmount = parseInt(cleanNumStr, 10);
 
-        if (!isNaN(parsedAmount) && parsedAmount > 0) {
-          const txDate = pendingTextForAmount.dateISO || new Date().toISOString();
-          const newTx: Transaction = {
-            id: `tx-${Date.now()}`,
-            rawText: pendingTextForAmount.text,
-            amount: parsedAmount,
-            category: pendingTextForAmount.category,
-            date: txDate,
-            isSynced: false
-          };
-          saveTransaction(newTx);
-          onTransactionUpdated();
+          if (!isNaN(parsedAmount) && parsedAmount > 0) {
+            const txDate = pendingTextForAmount.dateISO || new Date().toISOString();
+            const newTx: Transaction = {
+              id: `tx-${Date.now()}`,
+              rawText: pendingTextForAmount.text,
+              amount: parsedAmount,
+              category: pendingTextForAmount.category,
+              date: txDate,
+              isSynced: false
+            };
+            saveTransaction(newTx);
+            onTransactionUpdated();
 
-          const assistantReply: ChatMessage = {
-            id: `msg-${Date.now()}-a`,
-            sender: 'assistant',
-            text: pendingTextForAmount.dateLabel ? `🗓️ Dicatat untuk tanggal ${pendingTextForAmount.dateLabel}` : ``,
-            timestamp: new Date().toISOString(),
-            transactionId: newTx.id
-          };
-          saveMessage(assistantReply);
-          setMessages((prev) => [...prev, assistantReply]);
-          setPendingTextForAmount(null);
-          setIsTyping(false);
-          return;
+            const assistantReply: ChatMessage = {
+              id: `msg-${Date.now()}-a`,
+              sender: 'assistant',
+              text: pendingTextForAmount.dateLabel ? `🗓️ Dicatat untuk tanggal ${pendingTextForAmount.dateLabel}` : ``,
+              timestamp: new Date().toISOString(),
+              transactionId: newTx.id
+            };
+            saveMessage(assistantReply);
+            setMessages((prev) => [...prev, assistantReply]);
+            setPendingTextForAmount(null);
+            return;
+          }
         }
+
+        const errorReply: ChatMessage = {
+          id: `msg-${Date.now()}-a`,
+          sender: 'assistant',
+          text: `Maaf, nominal angka belum terdeteksi. Berapa nominal pengeluaran untuk "${pendingTextForAmount.text}"? (Contoh: 50000 atau 50rb)`,
+          timestamp: new Date().toISOString()
+        };
+        saveMessage(errorReply);
+        setMessages((prev) => [...prev, errorReply]);
+        return;
       }
 
-      const errorReply: ChatMessage = {
-        id: `msg-${Date.now()}-a`,
+      const parsed = await parseExpenseInputAsync(raw);
+
+      if (parsed.amount && parsed.amount > 0) {
+        const txDate = parsed.dateISO || new Date().toISOString();
+        const newTx: Transaction = {
+          id: `tx-${Date.now()}`,
+          rawText: raw,
+          amount: parsed.amount,
+          category: parsed.category,
+          date: txDate,
+          isSynced: false
+        };
+        saveTransaction(newTx);
+        onTransactionUpdated();
+
+        const assistantReply: ChatMessage = {
+          id: `msg-${Date.now()}-a`,
+          sender: 'assistant',
+          text: parsed.dateLabel ? `🗓️ Dicatat untuk tanggal ${parsed.dateLabel}` : ``,
+          timestamp: new Date().toISOString(),
+          transactionId: newTx.id
+        };
+        saveMessage(assistantReply);
+        setMessages((prev) => [...prev, assistantReply]);
+      } else {
+        setPendingTextForAmount({ text: raw, category: parsed.category, dateISO: parsed.dateISO, dateLabel: parsed.dateLabel });
+        const ec1Reply: ChatMessage = {
+          id: `msg-${Date.now()}-a`,
+          sender: 'assistant',
+          text: `Catatan diterima! Kategori terdeteksi: ${parsed.category}${parsed.dateLabel ? ` (${parsed.dateLabel})` : ''}.\n\nBerapa nominal pengeluaran untuk transaksi ini? (Ketik angkanya saja, contoh: 35rb atau 35000)`,
+          timestamp: new Date().toISOString()
+        };
+        saveMessage(ec1Reply);
+        setMessages((prev) => [...prev, ec1Reply]);
+      }
+    } catch (error) {
+      console.error('Error in handleSend:', error);
+      const fallbackReply: ChatMessage = {
+        id: `msg-${Date.now()}-err`,
         sender: 'assistant',
-        text: `Maaf, nominal angka belum terdeteksi. Berapa nominal pengeluaran untuk "${pendingTextForAmount.text}"? (Contoh: 50000 atau 50rb)`,
+        text: `Maaf, terjadi sedikit kendala memproses pesanmu. Coba ulangi sekali lagi ya!`,
         timestamp: new Date().toISOString()
       };
-      saveMessage(errorReply);
-      setMessages((prev) => [...prev, errorReply]);
+      setMessages((prev) => [...prev, fallbackReply]);
+    } finally {
       setIsTyping(false);
-      return;
     }
-
-    const parsed = await parseExpenseInputAsync(raw);
-
-    if (parsed.amount && parsed.amount > 0) {
-      const txDate = parsed.dateISO || new Date().toISOString();
-      const newTx: Transaction = {
-        id: `tx-${Date.now()}`,
-        rawText: raw,
-        amount: parsed.amount,
-        category: parsed.category,
-        date: txDate,
-        isSynced: false
-      };
-      saveTransaction(newTx);
-      onTransactionUpdated();
-
-      const assistantReply: ChatMessage = {
-        id: `msg-${Date.now()}-a`,
-        sender: 'assistant',
-        text: parsed.dateLabel ? `🗓️ Dicatat untuk tanggal ${parsed.dateLabel}` : ``,
-        timestamp: new Date().toISOString(),
-        transactionId: newTx.id
-      };
-      saveMessage(assistantReply);
-      setMessages((prev) => [...prev, assistantReply]);
-    } else {
-      setPendingTextForAmount({ text: raw, category: parsed.category, dateISO: parsed.dateISO, dateLabel: parsed.dateLabel });
-      const ec1Reply: ChatMessage = {
-        id: `msg-${Date.now()}-a`,
-        sender: 'assistant',
-        text: `Catatan diterima! Kategori terdeteksi: ${parsed.category}${parsed.dateLabel ? ` (${parsed.dateLabel})` : ''}.\n\nBerapa nominal pengeluaran untuk transaksi ini? (Ketik angkanya saja, contoh: 35rb atau 35000)`,
-        timestamp: new Date().toISOString()
-      };
-      saveMessage(ec1Reply);
-      setMessages((prev) => [...prev, ec1Reply]);
-    }
-
-    setIsTyping(false);
   };
 
   const handleDeleteTx = async (txId: string) => {

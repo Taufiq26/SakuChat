@@ -90,6 +90,15 @@ export default function Navbar({ onOpenSettings }: NavbarProps) {
               <span>AI Ready</span>
             </div>
           )}
+          {aiStatus === 'error' && (
+            <div
+              className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold bg-amber-50 text-amber-600 border border-amber-200 shadow-xs whitespace-nowrap"
+              title="Mode AI Hemat Cepat (Rule-Based Keyword Parser Aktif)"
+            >
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 shrink-0" />
+              <span>AI Hemat</span>
+            </div>
+          )}
 
           {/* Connection status badge */}
           <div

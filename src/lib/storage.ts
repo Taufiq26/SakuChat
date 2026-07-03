@@ -60,12 +60,12 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 
 export function getStoredTransactions(): Transaction[] {
   if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem(TRANSACTIONS_KEY);
-  if (!stored) {
-    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(INITIAL_TRANSACTIONS));
-    return INITIAL_TRANSACTIONS;
-  }
   try {
+    const stored = localStorage.getItem(TRANSACTIONS_KEY);
+    if (!stored) {
+      try { localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(INITIAL_TRANSACTIONS)); } catch {}
+      return INITIAL_TRANSACTIONS;
+    }
     return JSON.parse(stored);
   } catch {
     return [];
@@ -76,7 +76,7 @@ export function saveTransaction(tx: Transaction): Transaction[] {
   const current = getStoredTransactions();
   const updated = [tx, ...current];
   if (typeof window !== 'undefined') {
-    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
+    try { localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated)); } catch {}
   }
   return updated;
 }
@@ -85,30 +85,30 @@ export function deleteTransaction(id: string): Transaction[] {
   const current = getStoredTransactions();
   const updated = current.filter((t) => t.id !== id);
   if (typeof window !== 'undefined') {
-    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
-    const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
-    if (storedCloud) {
-      try {
+    try {
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
+      const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
+      if (storedCloud) {
         const cloudTxs: Transaction[] = JSON.parse(storedCloud);
         const updatedCloud = cloudTxs.filter((t) => t.id !== id);
         localStorage.setItem('sakuchat_cloud_transactions_cache_v1', JSON.stringify(updatedCloud));
-      } catch {}
-    }
+      }
+    } catch {}
   }
   return updated;
 }
 
 export function saveAllTransactions(transactions: Transaction[]): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions));
+    try { localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(transactions)); } catch {}
   }
 }
 
 export function getLearnedKeywords(): Record<string, CategoryName> {
   if (typeof window === 'undefined') return {};
-  const stored = localStorage.getItem(LEARNED_KEYWORDS_KEY);
-  if (!stored) return {};
   try {
+    const stored = localStorage.getItem(LEARNED_KEYWORDS_KEY);
+    if (!stored) return {};
     return JSON.parse(stored);
   } catch {
     return {};
@@ -117,23 +117,25 @@ export function getLearnedKeywords(): Record<string, CategoryName> {
 
 export function learnKeywordsFromCorrection(rawText: string, newCategory: CategoryName): void {
   if (typeof window === 'undefined') return;
-  const current = getLearnedKeywords();
-  
-  // Clean numbers, currency, units
-  const clean = rawText
-    .toLowerCase()
-    .replace(/(?:rp\.?\s*)?\d+(?:[\.,]\d+)*(?:\s*(?:rb|ribu|k|jt|juta))?/gi, ' ')
-    .replace(/[^a-z\s]/g, ' ')
-    .trim();
+  try {
+    const current = getLearnedKeywords();
+    
+    // Clean numbers, currency, units
+    const clean = rawText
+      .toLowerCase()
+      .replace(/(?:rp\.?\s*)?\d+(?:[\.,]\d+)*(?:\s*(?:rb|ribu|k|jt|juta))?/gi, ' ')
+      .replace(/[^a-z\s]/g, ' ')
+      .trim();
 
-  const stopWords = ['dan', 'untuk', 'beli', 'bayar', 'buat', 'oleh', 'di', 'ke', 'dari', 'yang', 'ini', 'itu', 'ada', 'sudah'];
-  const words = clean.split(/\s+/).filter((w) => w.length >= 3 && !stopWords.includes(w));
-  
-  words.forEach((word) => {
-    current[word] = newCategory;
-  });
+    const stopWords = ['dan', 'untuk', 'beli', 'bayar', 'buat', 'oleh', 'di', 'ke', 'dari', 'yang', 'ini', 'itu', 'ada', 'sudah'];
+    const words = clean.split(/\s+/).filter((w) => w.length >= 3 && !stopWords.includes(w));
+    
+    words.forEach((word) => {
+      current[word] = newCategory;
+    });
 
-  localStorage.setItem(LEARNED_KEYWORDS_KEY, JSON.stringify(current));
+    localStorage.setItem(LEARNED_KEYWORDS_KEY, JSON.stringify(current));
+  } catch {}
 }
 
 export function updateTransactionCategory(id: string, newCategory: CategoryName): Transaction[] {
@@ -144,30 +146,34 @@ export function updateTransactionCategory(id: string, newCategory: CategoryName)
   }
   const updated = current.map((t) => (t.id === id ? { ...t, category: newCategory } : t));
   if (typeof window !== 'undefined') {
-    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
-    const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
-    if (storedCloud) {
-      try {
+    try {
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
+      const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
+      if (storedCloud) {
         const cloudTxs: Transaction[] = JSON.parse(storedCloud);
         const updatedCloud = cloudTxs.map((t) => (t.id === id ? { ...t, category: newCategory } : t));
         localStorage.setItem('sakuchat_cloud_transactions_cache_v1', JSON.stringify(updatedCloud));
-      } catch {}
-    }
+      }
+    } catch {}
   }
   return updated;
 }
 
 export function getStoredMessages(): ChatMessage[] {
   if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem(MESSAGES_KEY);
-  if (!stored) {
-    localStorage.setItem(MESSAGES_KEY, JSON.stringify(INITIAL_MESSAGES));
-    return INITIAL_MESSAGES;
-  }
   try {
-    return JSON.parse(stored);
+    const stored = localStorage.getItem(MESSAGES_KEY);
+    if (!stored) {
+      try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(INITIAL_MESSAGES)); } catch {}
+      return INITIAL_MESSAGES;
+    }
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed) && parsed.length === 0) {
+      return INITIAL_MESSAGES;
+    }
+    return parsed;
   } catch {
-    return [];
+    return INITIAL_MESSAGES;
   }
 }
 
@@ -175,17 +181,19 @@ export function saveMessage(msg: ChatMessage): ChatMessage[] {
   const current = getStoredMessages();
   const updated = [...current, msg];
   if (typeof window !== 'undefined') {
-    localStorage.setItem(MESSAGES_KEY, JSON.stringify(updated));
+    try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(updated)); } catch {}
   }
   return updated;
 }
 
 export function clearAllLocalData(): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(TRANSACTIONS_KEY);
-    localStorage.removeItem(MESSAGES_KEY);
-    localStorage.removeItem(LEARNED_KEYWORDS_KEY);
-    localStorage.removeItem('sakuchat_cloud_transactions_cache_v1');
+    try {
+      localStorage.removeItem(TRANSACTIONS_KEY);
+      localStorage.removeItem(MESSAGES_KEY);
+      localStorage.removeItem(LEARNED_KEYWORDS_KEY);
+      localStorage.removeItem('sakuchat_cloud_transactions_cache_v1');
+    } catch {}
   }
 }
 

@@ -36,7 +36,7 @@ const CATEGORY_KEYWORDS: Record<CategoryName, string[]> = {
   'Kebutuhan Pribadi': [
     'skincare', 'sabun', 'shampo', 'sampo', 'odol', 'parfum', 'deodorants', 'deodorant', 'body lotion', 'serum',
     'sunscreen', 'salon', 'barbershop', 'cukur', 'potong rambut', 'baju', 'celana', 'sepatu', 'jaket', 'tas', 'dompet',
-    'kosmetik', 'makeup', 'lipstik', 'skincare wajah', 'perawatan'
+    'kosmetik', 'makeup', 'lipstik', 'skincare wajah', 'perawatan', 'rokok', 'roko', 'vape', 'pod', 'liquid'
   ],
   'Tagihan & Utilitas': [
     'listrik', 'token', 'pln', 'air', 'pdam', 'wifi', 'indihome', 'biznet', 'pulsa',
@@ -268,15 +268,19 @@ export async function parseExpenseInputAsync(rawInput: string): Promise<ParsedEx
   }
   
   // Rule 2: If local keyword matcher returned 'Lainnya', try On-Device WebAI semantic classification
-  const aiRes = await aiClassifier.classify(rawInput);
-  if (aiRes.category && aiRes.confidence > 32 && aiRes.category !== 'Lainnya') {
-    return {
-      amount: syncResult.amount,
-      category: aiRes.category,
-      cleanDescription: syncResult.cleanDescription,
-      dateISO: syncResult.dateISO,
-      dateLabel: syncResult.dateLabel
-    };
+  try {
+    const aiRes = await aiClassifier.classify(rawInput);
+    if (aiRes.category && aiRes.confidence > 32 && aiRes.category !== 'Lainnya') {
+      return {
+        amount: syncResult.amount,
+        category: aiRes.category,
+        cleanDescription: syncResult.cleanDescription,
+        dateISO: syncResult.dateISO,
+        dateLabel: syncResult.dateLabel
+      };
+    }
+  } catch (error) {
+    console.error('Error during AI classification fallback:', error);
   }
 
   return syncResult;
