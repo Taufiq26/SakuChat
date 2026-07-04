@@ -66,7 +66,17 @@ export function getStoredTransactions(): Transaction[] {
       try { localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(INITIAL_TRANSACTIONS)); } catch {}
       return INITIAL_TRANSACTIONS;
     }
-    return JSON.parse(stored);
+    const parsed: Transaction[] = JSON.parse(stored);
+    const seen = new Set<string>();
+    const deduped = parsed.filter((t) => {
+      if (seen.has(t.id)) return false;
+      seen.add(t.id);
+      return true;
+    });
+    if (deduped.length !== parsed.length) {
+      try { localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(deduped)); } catch {}
+    }
+    return deduped;
   } catch {
     return [];
   }
@@ -74,9 +84,26 @@ export function getStoredTransactions(): Transaction[] {
 
 export function saveTransaction(tx: Transaction): Transaction[] {
   const current = getStoredTransactions();
-  const updated = [tx, ...current];
+  const existingIdx = current.findIndex((t) => t.id === tx.id);
+  let updated: Transaction[];
+  if (existingIdx >= 0) {
+    updated = current.map((t) => (t.id === tx.id ? tx : t));
+  } else {
+    updated = [tx, ...current];
+  }
   if (typeof window !== 'undefined') {
-    try { localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated)); } catch {}
+    try {
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
+      const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
+      if (storedCloud) {
+        const cloudTxs: Transaction[] = JSON.parse(storedCloud);
+        const existsCloud = cloudTxs.some((t) => t.id === tx.id);
+        const updatedCloud = existsCloud
+          ? cloudTxs.map((t) => (t.id === tx.id ? tx : t))
+          : [tx, ...cloudTxs];
+        localStorage.setItem('sakuchat_cloud_transactions_cache_v1', JSON.stringify(updatedCloud));
+      }
+    } catch {}
   }
   return updated;
 }
@@ -108,8 +135,7 @@ export function getLearnedKeywords(): Record<string, CategoryName> {
   if (typeof window === 'undefined') return {};
   try {
     const stored = localStorage.getItem(LEARNED_KEYWORDS_KEY);
-    if (!stored) return {};
-    return JSON.parse(stored);
+    return stored ? JSON.parse(stored) : {};
   } catch {
     return {};
   }
@@ -152,6 +178,23 @@ export function updateTransactionCategory(id: string, newCategory: CategoryName)
       if (storedCloud) {
         const cloudTxs: Transaction[] = JSON.parse(storedCloud);
         const updatedCloud = cloudTxs.map((t) => (t.id === id ? { ...t, category: newCategory } : t));
+        localStorage.setItem('sakuchat_cloud_transactions_cache_v1', JSON.stringify(updatedCloud));
+      }
+    } catch {}
+  }
+  return updated;
+}
+
+export function updateTransactionDate(id: string, newDateISO: string): Transaction[] {
+  const current = getStoredTransactions();
+  const updated = current.map((t) => (t.id === id ? { ...t, date: newDateISO, isSynced: false } : t));
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(updated));
+      const storedCloud = localStorage.getItem('sakuchat_cloud_transactions_cache_v1');
+      if (storedCloud) {
+        const cloudTxs: Transaction[] = JSON.parse(storedCloud);
+        const updatedCloud = cloudTxs.map((t) => (t.id === id ? { ...t, date: newDateISO, isSynced: false } : t));
         localStorage.setItem('sakuchat_cloud_transactions_cache_v1', JSON.stringify(updatedCloud));
       }
     } catch {}

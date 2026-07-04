@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, Sparkles, Tag, ArrowRight, MessageSquarePlus, Calendar } from 'lucide-react';
 import { Transaction, ChatMessage, CategoryName } from '@/types';
 import { parseExpenseInput, parseExpenseInputAsync, CATEGORY_COLORS } from '@/lib/parser';
-import { getStoredMessages, saveMessage, getStoredTransactions, saveTransaction, deleteTransaction, updateTransactionCategory } from '@/lib/storage';
-import { deleteCloudTransaction, updateCloudTransactionCategory } from '@/lib/supabase';
+import { getStoredMessages, saveMessage, getStoredTransactions, saveTransaction, deleteTransaction, updateTransactionCategory, updateTransactionDate } from '@/lib/storage';
+import { deleteCloudTransaction, updateCloudTransactionCategory, updateCloudTransactionDate } from '@/lib/supabase';
 
 const ALL_CATEGORIES: CategoryName[] = [
   'Makanan & Minuman',
@@ -281,16 +281,11 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
     onTransactionUpdated();
   };
 
-  const handleDateUpdate = (txId: string, newDateISO: string) => {
-    const stored = getStoredTransactions();
-    const target = stored.find((t) => t.id === txId);
-    if (target) {
-      target.date = newDateISO;
-      target.isSynced = false;
-      saveTransaction(target);
-      onTransactionUpdated();
-      setMessages((prev) => [...prev]);
-    }
+  const handleDateUpdate = async (txId: string, newDateISO: string) => {
+    updateTransactionDate(txId, newDateISO);
+    setMessages((prev) => [...prev]);
+    await updateCloudTransactionDate(txId, newDateISO);
+    onTransactionUpdated();
   };
 
   const suggestionChipsList = [

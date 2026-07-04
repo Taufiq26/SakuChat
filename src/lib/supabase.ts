@@ -290,6 +290,24 @@ export async function updateCloudTransactionCategory(id: string, newCategory: st
   }
 }
 
+export async function updateCloudTransactionDate(id: string, newDateISO: string): Promise<void> {
+  const session = getStoredSession();
+  if (!session.isLoggedIn || !supabase) return;
+
+  try {
+    const { data: { session: authSession } } = await supabase.auth.getSession();
+    const token = authSession?.access_token || getActiveAccessToken();
+    const dbClient = token ? (getAuthClient(token) || supabase) : supabase;
+
+    if (dbClient) {
+      await dbClient.from('transactions').update({ date: newDateISO }).eq('id', id).eq('user_id', session.email);
+      await dbClient.from('expenses').update({ date: newDateISO }).eq('id', id).eq('user_id', session.email);
+    }
+  } catch (err) {
+    console.error('Failed to update cloud transaction date:', err);
+  }
+}
+
 export async function deleteAllCloudTransactions(): Promise<void> {
   const session = getStoredSession();
   if (!supabase) return;
