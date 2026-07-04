@@ -182,6 +182,34 @@ function extractNaturalLanguageDate(text: string): { dateISO?: string; dateLabel
     }
   }
 
+  // 6. Date without month (e.g. "tgl 3", "tanggal 30", "tgl 5")
+  const dayOnlyMatch = text.match(/(?:^|\s)(?:tgl|tanggal)\s*(\d{1,2})\b|\b(\d{1,2})\s*(?:tgl|tanggal)\b/i);
+  if (dayOnlyMatch) {
+    const dayStr = dayOnlyMatch[1] || dayOnlyMatch[2];
+    const day = parseInt(dayStr, 10);
+    if (day >= 1 && day <= 31) {
+      let year = now.getFullYear();
+      let month = now.getMonth();
+      const currentDay = now.getDate();
+
+      // If requested day > today's day number, it refers to the nearest past month
+      if (day > currentDay) {
+        month -= 1;
+        if (month < 0) {
+          month = 11;
+          year -= 1;
+        }
+      }
+
+      const maxDaysInMonth = new Date(year, month + 1, 0).getDate();
+      const actualDay = Math.min(day, maxDaysInMonth);
+
+      const d = new Date(year, month, actualDay, 12, 0, 0);
+      const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return { dateISO: d.toISOString(), dateLabel: `${actualDay} ${shortMonthNames[month]} ${year}` };
+    }
+  }
+
   return {};
 }
 
