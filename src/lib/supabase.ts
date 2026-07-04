@@ -5,12 +5,22 @@ import { getStoredTransactions } from '@/lib/storage';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+const customLock = (name: string, acquireTimeout: number, fn: () => Promise<any>) => {
+  if (typeof window !== 'undefined' && window.isSecureContext && window.navigator && window.navigator.locks) {
+    return window.navigator.locks.request(name, { mode: 'exclusive' }, async () => {
+      return await fn();
+    });
+  }
+  return fn();
+};
+
 export const supabase = (supabaseUrl && supabaseKey) 
   ? createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        lock: customLock
       }
     }) 
   : null;

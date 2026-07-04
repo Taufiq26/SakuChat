@@ -53,7 +53,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'm-0',
     sender: 'assistant',
-    text: 'Halo! Selamat datang di **SakuChat** 👋 Asisten keuangan pribadi berbasis obrolan.\n\nKamu tidak perlu mengisi formulir panjang! Cukup ketik pengeluaranmu secara alami di bawah ini, contoh:\n- *"Makan siang di warteg 25rb"*\n- *"Grab ke kantor 35000"*\n- *"Bayar tagihan listrik 350rb"*\n\n💡 *Tips: Kamu juga bisa mencatat banyak pengeluaran sekaligus dengan memisahkannya pakai baris baru (new line / Enter).*',
+    text: 'Halo! Selamat datang di **SakuChat** 👋 Asisten keuangan pribadi berbasis obrolan.\n\nKamu tidak perlu mengisi formulir panjang! Cukup ketik pengeluaranmu secara alami di bawah ini, contoh:\n- *"Makan siang di warteg 25rb"*\n- *"Grab ke kantor 35000"*\n- *"Kemarin beli kopi 20rb"*\n\n💡 **Tips Praktis:**\n• **Banyak Sekaligus:** Pisahkan setiap pengeluaran pakai baris baru (Enter / Shift+Enter).\n• **Tanggal Lampau:** Tambahkan keterangan tanggal (misal: *kemarin*, *tgl 3*). Kamu juga bisa mengetik tanggal di baris pertama agar berlaku untuk semua pengeluaran di bawahnya!',
     timestamp: new Date(Date.now() - 3600000).toISOString()
   }
 ];
@@ -214,7 +214,7 @@ export function getStoredMessages(): ChatMessage[] {
     if (Array.isArray(parsed) && parsed.length === 0) {
       return INITIAL_MESSAGES;
     }
-    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id === 'm-0' && !parsed[0].text.includes('baris baru')) {
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id === 'm-0') {
       parsed[0].text = INITIAL_MESSAGES[0].text;
       try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(parsed)); } catch {}
     }

@@ -32,7 +32,7 @@ export default function Navbar({ onOpenSettings }: NavbarProps) {
       autoSyncIfOnline().then(() => setSession(getStoredSession()));
     }
 
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && window.isSecureContext) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
 

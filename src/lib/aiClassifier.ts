@@ -59,6 +59,13 @@ class AIClassifierSingleton {
     if (typeof window === 'undefined') return;
     if (this.status === 'ready' || this.status === 'loading') return;
 
+    if (!window.isSecureContext || typeof caches === 'undefined') {
+      console.warn('Insecure HTTP LAN origin detected. WebAI requires HTTPS or localhost. Activating fast keyword parser fallback.');
+      this.status = 'error';
+      this.notify();
+      return;
+    }
+
     try {
       this.status = 'loading';
       this.progress = 5;

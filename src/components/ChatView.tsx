@@ -38,11 +38,19 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
   const [activeModalTxId, setActiveModalTxId] = useState<string | null>(null);
   const [activeDateModalTxId, setActiveDateModalTxId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     setMessages(getStoredMessages());
   }, []);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 112)}px`;
+    }
+  }, [inputText]);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -130,12 +138,20 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
       if (lines.length > 1) {
         const createdTxs: Transaction[] = [];
         const pendingLines: { text: string; category: CategoryName; dateISO?: string; dateLabel?: string }[] = [];
+        let inheritedDateISO: string | undefined = undefined;
+        let inheritedDateLabel: string | undefined = undefined;
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
           const parsed = await parseExpenseInputAsync(line);
+
+          if (parsed.dateISO) {
+            inheritedDateISO = parsed.dateISO;
+            inheritedDateLabel = parsed.dateLabel;
+          }
+
           if (parsed.amount && parsed.amount > 0) {
-            const txDate = parsed.dateISO || new Date().toISOString();
+            const txDate = parsed.dateISO || inheritedDateISO || new Date().toISOString();
             const txSuffix = Math.random().toString(36).substring(2, 7);
             const newTx: Transaction = {
               id: `tx-${Date.now()}-${txSuffix}-${i}`,
@@ -148,7 +164,24 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
             saveTransaction(newTx);
             createdTxs.push(newTx);
           } else {
-            pendingLines.push({ text: line, category: parsed.category, dateISO: parsed.dateISO, dateLabel: parsed.dateLabel });
+            // Check if this line is purely a date header (e.g. "kemarin", "tgl 2 juli", "hari senin")
+            const textWithoutDate = line
+              .toLowerCase()
+              .replace(/\b(kemarin|lusa|hari ini|tgl|tanggal|jan|feb|mar|apr|mei|jun|jul|agu|sep|okt|nov|des|januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember|senin|selasa|rabu|kamis|jumat|sabtu|minggu|lalu)\b/g, '')
+              .replace(/[0-9/\-]/g, '')
+              .trim();
+
+            if (parsed.dateISO && textWithoutDate.length < 3) {
+              // It's a date header line setting the date for subsequent lines
+              continue;
+            }
+
+            pendingLines.push({
+              text: line,
+              category: parsed.category,
+              dateISO: parsed.dateISO || inheritedDateISO,
+              dateLabel: parsed.dateLabel || inheritedDateLabel
+            });
           }
         }
 
@@ -159,7 +192,13 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
         const createdIds = createdTxs.map((t) => t.id);
         let replyText = '';
         if (createdTxs.length > 1) {
-          replyText = `🗓️ ${createdTxs.length} transaksi berhasil dicatat sekaligus!`;
+          const summaryItems = createdTxs
+            .map((t) => {
+              const dLabel = new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+              return `• Rp ${t.amount.toLocaleString('id-ID')} (${t.category}) [${dLabel}]`;
+            })
+            .join('\n');
+          replyText = `🗓️ ${createdTxs.length} transaksi berhasil dicatat sekaligus!\n\n${summaryItems}`;
         } else if (createdTxs.length === 1) {
           const firstTxDateLabel = lines[0] ? (await parseExpenseInputAsync(lines[0])).dateLabel : undefined;
           replyText = firstTxDateLabel ? `🗓️ Dicatat untuk tanggal ${firstTxDateLabel}` : '';
@@ -437,11 +476,22 @@ export default function ChatView({ onTransactionUpdated }: ChatViewProps) {
       <div className="px-4 pb-3 pt-1 bg-transparent z-10">
         <div className="floating-input-bar flex items-end gap-2 px-2 py-1.5">
           <textarea
+            ref={textareaRef}
             rows={1}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => {
+              const isTouchOrMobile = typeof window !== 'undefined' && (
+                window.matchMedia('(pointer: coarse)').matches ||
+                /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+              );
+
               if (e.key === 'Enter' && !e.shiftKey) {
+                if (isTouchOrMobile) {
+                  // Di HP/Touchscreen, tombol Enter/Return di keyboard virtual berfungsi menambah baris baru (new line).
+                  // Untuk mengirim pesan, pengguna menekan tombol ikon Kirim (Send).
+                  return;
+                }
                 e.preventDefault();
                 handleSend();
               }
