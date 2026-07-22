@@ -277,14 +277,34 @@ export default function ReportsView() {
           </div>
 
           {/* Total Card */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 border border-indigo-500/30 dark:border-indigo-500/40 relative overflow-hidden shadow-lg dark:shadow-indigo-950/50">
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 border border-indigo-500/30 dark:border-indigo-500/40 relative overflow-hidden shadow-lg dark:shadow-indigo-950/50 flex flex-col gap-4 sm:flex-row sm:items-end justify-between">
             <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 dark:bg-indigo-400/10 rounded-full blur-xl pointer-events-none" />
-            <span className="text-xs font-extrabold text-indigo-100 dark:text-indigo-300 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-indigo-200 dark:text-indigo-400" /> Total Pengeluaran ({filteredTransactions.length} Transaksi)
-            </span>
-            <div className="text-3xl font-black mt-2 text-white dark:text-slate-100 tracking-tight">
-              Rp {totalSpent.toLocaleString('id-ID')}
+            <div className="relative z-10">
+              <span className="text-xs font-extrabold text-indigo-100 dark:text-indigo-300 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-indigo-200 dark:text-indigo-400" /> Total Pengeluaran
+              </span>
+              <div className="text-3xl font-black mt-2 text-white dark:text-slate-100 tracking-tight">
+                Rp {totalSpent.toLocaleString('id-ID')}
+              </div>
             </div>
+            
+            <button
+              onClick={() => {
+                const filterLabel = filter === 'harian' 
+                  ? (harianFilter === 'today' ? 'Hari Ini' : harianFilter === '7days' ? '7 Hari Terakhir' : 'Pilihan Tanggal')
+                  : filter === 'month' ? 'Bulan Ini' : 'Semua Data';
+                setDetailModal({
+                  isOpen: true,
+                  title: 'Daftar Pengeluaran',
+                  subtitle: `Periode: ${filterLabel} • ${filteredTransactions.length} Transaksi`,
+                  transactions: filteredTransactions.slice().sort((a, b) => b.amount - a.amount),
+                  hideCategory: false
+                });
+              }}
+              className="relative z-10 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 border border-white/20 dark:border-indigo-500/30 text-white font-bold text-xs transition-all shadow-sm flex items-center gap-2 cursor-pointer w-fit"
+            >
+              Lihat Rincian <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
+            </button>
           </div>
 
           {/* Sleek Ring Dashboard */}
@@ -486,57 +506,7 @@ export default function ReportsView() {
             )}
           </div>
 
-          {/* Detailed Transaction List */}
-          <div className="glass-panel p-5 space-y-4">
-            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-800 dark:text-slate-100">
-              <Calendar className="w-4 h-4 text-indigo-500" />
-              <span>Daftar Pengeluaran</span>
-            </div>
 
-            {filteredTransactions.length === 0 ? (
-              <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 italic py-2">Belum ada data transaksi.</p>
-            ) : (
-              <div className="space-y-2">
-                {filteredTransactions
-                  .slice()
-                  .sort((a, b) => b.amount - a.amount)
-                  .map((tx) => {
-                    const catColor = CATEGORY_COLORS[tx.category] || '#818CF8';
-                    const dateFormatted = new Date(tx.date).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    });
-                    return (
-                      <div
-                        key={tx.id}
-                        className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex flex-col gap-2 shadow-xs transition-all hover:border-indigo-300 dark:hover:border-indigo-500/50"
-                      >
-                        <div>
-                          <span
-                            className="text-[10px] font-black px-2.5 py-0.5 rounded-md text-white inline-block shadow-2xs max-w-full break-words"
-                            style={{ backgroundColor: catColor }}
-                          >
-                            {tx.category}
-                          </span>
-                        </div>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="font-bold text-sm text-slate-800 dark:text-slate-100 break-words leading-snug flex-1">
-                            {tx.rawText}
-                          </div>
-                          <div className="font-black text-sm text-emerald-600 dark:text-emerald-400 shrink-0 text-right">
-                            Rp {tx.amount.toLocaleString('id-ID')}
-                          </div>
-                        </div>
-                        <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                          <Calendar className="w-3 h-3 inline" /> {dateFormatted}
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
-          </div>
         </>
       ) : (
         /* Annual Analysis & Monthly Comparison Tab */
