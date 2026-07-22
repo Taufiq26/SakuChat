@@ -18,7 +18,10 @@ interface DetailModalInfo {
 export default function ReportsView() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<'summary' | 'annual'>('summary');
-  const [filter, setFilter] = useState<'all' | '7days' | 'month'>('7days');
+  const [filter, setFilter] = useState<'harian' | 'month' | 'all'>('harian');
+  const [harianFilter, setHarianFilter] = useState<'today' | '7days' | 'custom'>('today');
+  const [customDateStart, setCustomDateStart] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [customDateEnd, setCustomDateEnd] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedCategory, setSelectedCategory] = useState<string>('SEMUA');
   const [detailModal, setDetailModal] = useState<DetailModalInfo | null>(null);
@@ -38,9 +41,24 @@ export default function ReportsView() {
   const filteredTransactions = transactions.filter((t) => {
     const txDate = new Date(t.date);
     const now = new Date();
-    if (filter === '7days') {
-      const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
-      return txDate >= sevenDaysAgo;
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (filter === 'harian') {
+      if (harianFilter === 'today') {
+        const txDateStartOfDay = new Date(txDate.getFullYear(), txDate.getMonth(), txDate.getDate());
+        return txDateStartOfDay.getTime() === startOfToday.getTime();
+      }
+      if (harianFilter === '7days') {
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
+        return txDate >= sevenDaysAgo;
+      }
+      if (harianFilter === 'custom') {
+        if (!customDateStart || !customDateEnd) return true;
+        const start = new Date(customDateStart);
+        const end = new Date(customDateEnd);
+        end.setHours(23, 59, 59, 999);
+        return txDate >= start && txDate <= end;
+      }
     }
     if (filter === 'month') {
       return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
@@ -189,23 +207,73 @@ export default function ReportsView() {
       {activeTab === 'summary' ? (
         <>
           {/* Time Filter Tabs */}
-          <div className="flex p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70 gap-1 shadow-inner">
-            {[
-              { id: '7days', label: '7 Hari Terakhir' },
-              { id: 'month', label: 'Bulan Ini' },
-              { id: 'all', label: 'Semua Waktu' }
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setFilter(item.id as 'all' | '7days' | 'month')}
-                className={`flex-1 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${filter === item.id
-                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-bold'
-                  }`}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="flex flex-col gap-3">
+            <div className="flex p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70 gap-1 shadow-inner">
+              {[
+                { id: 'harian', label: 'Harian' },
+                { id: 'month', label: 'Bulan Ini' },
+                { id: 'all', label: 'Semua Waktu' }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setFilter(item.id as 'harian' | 'month' | 'all')}
+                  className={`flex-1 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${filter === item.id
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/60 dark:border-slate-700'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-bold'
+                    }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            {filter === 'harian' && (
+              <div className="animate-in fade-in slide-in-from-top-1 duration-300 flex flex-col gap-2.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  {[
+                    { id: 'today', label: 'Hari Ini' },
+                    { id: '7days', label: '7 Hari Terakhir' },
+                    { id: 'custom', label: 'Pilih Tanggal' }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setHarianFilter(item.id as 'today' | '7days' | 'custom')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                        harianFilter === item.id
+                          ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30 shadow-sm'
+                          : 'bg-white/50 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 border-slate-200/60 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                {harianFilter === 'custom' && (
+                  <div className="flex items-center gap-2 p-1.5 bg-white/80 dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200 backdrop-blur-sm">
+                    <div className="relative flex-1">
+                      <Calendar className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-indigo-400/80 dark:text-indigo-500/80 pointer-events-none" />
+                      <input
+                        type="date"
+                        value={customDateStart}
+                        onChange={(e) => setCustomDateStart(e.target.value)}
+                        className="w-full pl-8 pr-2 py-2 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 dark:focus:border-indigo-600 transition-all"
+                      />
+                    </div>
+                    <span className="text-slate-300 dark:text-slate-600 font-black text-xs">-</span>
+                    <div className="relative flex-1">
+                      <Calendar className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-indigo-400/80 dark:text-indigo-500/80 pointer-events-none" />
+                      <input
+                        type="date"
+                        value={customDateEnd}
+                        onChange={(e) => setCustomDateEnd(e.target.value)}
+                        className="w-full pl-8 pr-2 py-2 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 dark:focus:border-indigo-600 transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Total Card */}
@@ -382,7 +450,9 @@ export default function ReportsView() {
                         const catTxs = filteredTransactions
                           .filter((t) => t.category === cat.category)
                           .sort((a, b) => b.amount - a.amount);
-                        const filterLabel = filter === '7days' ? '7 Hari Terakhir' : filter === 'month' ? 'Bulan Ini' : 'Semua Data';
+                        const filterLabel = filter === 'harian' 
+                          ? (harianFilter === 'today' ? 'Hari Ini' : harianFilter === '7days' ? '7 Hari Terakhir' : 'Pilihan Tanggal')
+                          : filter === 'month' ? 'Bulan Ini' : 'Semua Data';
                         setDetailModal({
                           isOpen: true,
                           title: 'Top Spending',
@@ -412,6 +482,58 @@ export default function ReportsView() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          {/* Detailed Transaction List */}
+          <div className="glass-panel p-5 space-y-4">
+            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-800 dark:text-slate-100">
+              <Calendar className="w-4 h-4 text-indigo-500" />
+              <span>Daftar Pengeluaran</span>
+            </div>
+
+            {filteredTransactions.length === 0 ? (
+              <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 italic py-2">Belum ada data transaksi.</p>
+            ) : (
+              <div className="space-y-2">
+                {filteredTransactions
+                  .slice()
+                  .sort((a, b) => b.amount - a.amount)
+                  .map((tx) => {
+                    const catColor = CATEGORY_COLORS[tx.category] || '#818CF8';
+                    const dateFormatted = new Date(tx.date).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    });
+                    return (
+                      <div
+                        key={tx.id}
+                        className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex flex-col gap-2 shadow-xs transition-all hover:border-indigo-300 dark:hover:border-indigo-500/50"
+                      >
+                        <div>
+                          <span
+                            className="text-[10px] font-black px-2.5 py-0.5 rounded-md text-white inline-block shadow-2xs max-w-full break-words"
+                            style={{ backgroundColor: catColor }}
+                          >
+                            {tx.category}
+                          </span>
+                        </div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="font-bold text-sm text-slate-800 dark:text-slate-100 break-words leading-snug flex-1">
+                            {tx.rawText}
+                          </div>
+                          <div className="font-black text-sm text-emerald-600 dark:text-emerald-400 shrink-0 text-right">
+                            Rp {tx.amount.toLocaleString('id-ID')}
+                          </div>
+                        </div>
+                        <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                          <Calendar className="w-3 h-3 inline" /> {dateFormatted}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>
